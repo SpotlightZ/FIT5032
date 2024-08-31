@@ -47,7 +47,7 @@ const doLogin = () => {
 
     const role = JSON.parse(localStorage.getItem('loggedInUser')).role
     if (role === 'admin') {
-      router.replace("/home");
+      router.replace("/about");
     } else if (role === 'user') {
       router.replace("/about");
     } else {

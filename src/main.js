@@ -10,9 +10,10 @@ import App from './App.vue'
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 import router from './router'
-// import { i } from 'vite/dist/node/types.d-aGj9QkWt'
-// import DataTable from 'primevue/datatable'
-// import Column from 'primevue/Column'
+
+// if (window.location.protocol !== 'https:') {
+//   window.location.href = 'https://' + window.location.hostname + window.location.pathname + window.location.search;
+// }
 
 const app = createApp(App)
 const pinia = createPinia()

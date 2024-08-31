@@ -45,7 +45,7 @@ const toSubmit = () => {
     <div class="row bg d-flex align-items-center">
       <div class="col-md-8 offset-md-2">
         <h1 class="text-center fs-1">Friends for Life</h1>
-        <p class="text-center fs-5">Companionship to senior individuals through pet ownership, while saving the lives of companion animals in shelters</p>
+        <p class="text-center fs-3">Companionship to senior individuals through pet ownership, while saving the lives of companion animals in shelters</p>
       </div>
     </div>
   </div>
@@ -64,8 +64,6 @@ const toSubmit = () => {
   
 <style scoped>
 .bg {
-  width: 100%;
-  height: 60vh;
   background: url('../assets/images/bg-about.png') no-repeat;
   background-size: 100%;
 }

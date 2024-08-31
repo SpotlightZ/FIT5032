@@ -99,10 +99,9 @@ const validateText = (blur) => {
   <div class="container mt-5">
     <div class="row">
       <div class="col-md-8 offset-md-2">
-        <h1 class="text-center">🗄️ W4. Library Registration Form</h1>
+        <h1 class="text-center">Get Senior Pets in Your Home</h1>
         <p class="text-center">
-          This form now includes validation. Registered users are displayed in a data table below
-          (PrimeVue).
+          Heartwarming happy tails are coming right up!
         </p>
         <form @submit.prevent="submitForm">
           <div class="row mb-3">

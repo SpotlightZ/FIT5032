@@ -1,4 +1,43 @@
 <script setup>
+import { ref } from 'vue'
+import Menubar from 'primevue/menubar';
+import { useUserStore } from '@/store';
+import router from '@/router/index'
+
+const userStore = useUserStore();
+
+const toLogout = () => {
+  userStore.logout();
+  router.replace("/login");
+}
+
+const items = ref([
+  {
+    label: 'Pet List',
+    items: [
+        { label: 'Find a Pet', command: () => this.handleClick('find') },
+        { label: 'Adopt a Pet', command: () => router.push('/home') }
+    ]
+  },
+  {
+    label: 'Our Work',
+    items: [
+      { label: ' Articles & Resources', command: () => this.handleClick('articles') }
+    ]
+  },
+  {
+    label: 'About Us',
+    items: [
+      { label: 'Who We Are', command: () => router.push('/about') },
+      { label: 'Staff', command: () => this.handleClick('staff') }
+    ]
+  },
+  {
+    label: 'Contact Us', command: () => this.handleClick('contact')
+  }
+])
+
+
 
 function getUserRole() {
   // Determine user whether to log in
@@ -8,23 +47,33 @@ function getUserRole() {
 let userRole = getUserRole()
 
 </script>
+
 <template>
-  <!-- Using Bootstrap's Header template (starter code) -->
-  <!-- https://getbootstrap.com/docs/5.0/examples/headers/ -->
-  <div class="container">
+  <Menubar :model="items">
+    <template #end>
+      <div class="flex items-center gap-2">
+        <div class="logout row justify-content-end text-center">
+          <button @click="toLogout">logout</button>
+        </div>
+      </div>
+    </template>
+  </Menubar>
+
+
+  <!-- <div class="container">
     <header class="d-flex justify-content-center py-3">
       <ul class="nav nav-pills">
         <li class="nav-item" v-if="userRole === 'admin'">
           <router-link to="home" class="nav-link" active-class="active" aria-current="page"
-            >Home (Week 5)</router-link
+            >Home</router-link
           >
         </li>
         <li class="nav-item">
-          <router-link to="about" class="nav-link" active-class="active">About</router-link>
+          <router-link to="about" class="nav-link" active-class="active">About Us</router-link>
         </li>
       </ul>
     </header>
-  </div>
+  </div> -->
 </template>
 
 <style scoped>
@@ -61,5 +110,20 @@ let userRole = getUserRole()
 
 .dropdown-toggle {
   outline: 0;
+}
+
+.logout {
+  justify-content: end;
+  padding: 0px 10px;
+}
+
+.logout > button {
+    display: inline-block;
+    width: 80px;
+    height: 35px;
+    line-height: 20px;
+    border-radius: 8px;
+    color: #fff;
+    background: #000;
 }
 </style>

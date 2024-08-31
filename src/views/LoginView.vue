@@ -55,6 +55,9 @@ const doLogin = () => {
         // loginLoading.value = false;
     }
 
+const toRegister = () => {
+  router.replace("/register");
+}
 }
 
 </script>
@@ -92,7 +95,11 @@ const doLogin = () => {
           <div v-if="errors.password" class="text-danger">{{ errors.password }}</div>
         </div>
       </div>
-      <button @click="doLogin" type="submit" >Login</button>
+      <button @click="doLogin" type="submit" >Sign in</button>
+
+      <div class="mt-4">Don't have an account?
+        <button class="join mt-2" @click="toRegister">Join today</button>
+      </div>
   </div>
 </div>
 </template>
@@ -124,5 +131,12 @@ button {
   color: #fff;
   border: none;
   border-radius: 16px;
+}
+
+.join {
+  background: transparent;
+  border: 1px solid #674D3F;
+  color: #674D3F;
+  height: 30px;
 }
 </style>

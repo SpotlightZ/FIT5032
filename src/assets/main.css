@@ -1,11 +1,13 @@
 @import './base.css';
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
 
-
-body {
-  /* height: 95vh; */
-  /* background: url('../images/background.png') no-repeat; */
-  /* background-size: 100%; */
-  /* line-height: 1.6; */
-  font-size: .16rem;
+ul {
+  list-style: none;
 }

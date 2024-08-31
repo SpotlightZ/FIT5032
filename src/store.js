@@ -18,6 +18,17 @@ const useUserStore = defineStore("user",
             loggedInUser: null,
         }),
         actions: {
+            // register a new user
+            register(newUser) {
+                const existingUser = this.users.find((u) => u.userName === newUser.userName);
+                if (existingUser) {
+                  alert('Username already exists. Please choose a different one.');
+                } else {
+                  this.users.push(newUser);
+                  localStorage.setItem('users', JSON.stringify(this.users));
+                  alert('Registration successful!');
+                }
+              },
             logout() {
                 this.loggedInUser = null;
                 localStorage.removeItem('loggedInUser');
@@ -42,6 +53,11 @@ const useUserStore = defineStore("user",
                 const user = JSON.parse(localStorage.getItem('loggedInUser'));
                 if (user) {
                     this.loggedInUser = user;
+                }
+                // load all of users from local storage
+                const storedUsers = JSON.parse(localStorage.getItem('users'));
+                if (storedUsers) {
+                  this.users = storedUsers;
                 }
             }
         },

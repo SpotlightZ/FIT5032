@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
+import { useUserStore } from '@/store';
+
 
 const formData = ref({
   username: '',
@@ -9,8 +9,7 @@ const formData = ref({
   confirmPassword: '',
   isAustralian: false,
   reason: '',
-  gender: '',
-  suburb: 'Clayton'
+  role: '',
 })
 
 const submittedCards = ref([])
@@ -19,7 +18,12 @@ const submitForm = () => {
   validateName(true)
   validatePassword(true)
   if (!errors.value.username && !errors.value.password) {
-    submittedCards.value.push({ ...formData.value })
+    // submittedCards.value.push({ ...formData.value })
+    useUserStore().register({
+      userName: formData.value.username,
+      password: formData.value.password,
+      role: formData.value.role
+    });
     clearForm()
   }
 }
@@ -30,8 +34,7 @@ const clearForm = () => {
     password: '',
     isAustralian: false,
     reason: '',
-    gender: '',
-    suburb: 'Clayton'
+    role: '',
   }
 }
 
@@ -40,7 +43,7 @@ const errors = ref({
   password: null,
   confirmPassword: null,
   resident: null,
-  gender: null,
+  role: null,
   reason: null
 })
 
@@ -95,17 +98,12 @@ const validateText = (blur) => {
 </script>
 
 <template>
-  <!-- 🗄️ W3. Library Registration Form -->
-  <div class="container mt-5">
+  <div class="container pb-5">
     <div class="row">
-      <div class="col-md-8 offset-md-2">
-        <h1 class="text-center">🗄️ W4. Library Registration Form</h1>
-        <p class="text-center">
-          This form now includes validation. Registered users are displayed in a data table below
-          (PrimeVue).
-        </p>
+      <div class="col-md-8 offset-md-2 main">
+        <h1 class="text-center">Sign up for a FIT5032 Assessment 2</h1>
         <form @submit.prevent="submitForm">
-          <div class="row mb-3">
+          <div class="row mb-3 mt-5">
             <div class="col-md-6 col-sm-6">
               <label for="username" class="form-label">Username</label>
               <input
@@ -120,15 +118,15 @@ const validateText = (blur) => {
             </div>
 
             <div class="col-md-6 col-sm-6">
-              <label for="gender" class="form-label">Gender</label>
-              <select class="form-select" id="gender" v-model="formData.gender" required>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
+              <label for="role" class="form-label">Role</label>
+              <select class="form-select" id="role" v-model="formData.role" required>
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+                <option value="guest">Guest</option>
               </select>
             </div>
 
-            <div class="col-md-6 col-sm-6">
+            <div>
               <label for="password" class="form-label">Password</label>
               <input
                 type="password"
@@ -140,7 +138,7 @@ const validateText = (blur) => {
               />
               <div v-if="errors.password" class="text-danger">{{ errors.password }}</div>
             </div>
-            <div class="col-md-6 col-sm-6">
+            <div>
               <label for="confirm-password" class="form-label">Confirm password</label>
               <input
                 type="password"
@@ -180,10 +178,6 @@ const validateText = (blur) => {
               {{ errors.reason }}
             </div>
           </div>
-          <div class="mb-3">
-            <label for="reason" class="form-label">Suburb</label>
-            <input type="text" class="form-control" id="suburb" v-bind:value="formData.suburb" />
-          </div>
           <div class="text-center">
             <button type="submit" class="btn btn-primary me-2">Submit</button>
             <button type="button" class="btn btn-secondary" @click="clearForm">Clear</button>
@@ -193,13 +187,13 @@ const validateText = (blur) => {
     </div>
   </div>
 
-  <div class="row mt-5">
+  <!-- <div class="row mt-5">
     <h4>This is a Primevue Datatable.</h4>
     <DataTable :value="submittedCards" tableStyle="min-width: 50rem">
       <Column field="username" header="Username"></Column>
       <Column field="password" header="Password"></Column>
       <Column field="isAustralian" header="Australian Resident"></Column>
-      <Column field="gender" header="Gender"></Column>
+      <Column field="role" header="role"></Column>
       <Column field="reason" header="Reason"></Column>
     </DataTable>
   </div>
@@ -219,13 +213,25 @@ const validateText = (blur) => {
           <li class="list-group-item">
             Australian Resident: {{ card.isAustralian ? 'Yes' : 'No' }}
           </li>
-          <li class="list-group-item">Gender: {{ card.gender }}</li>
+          <li class="list-group-item">role: {{ card.role }}</li>
           <li class="list-group-item">Reason: {{ card.reason }}</li>
         </ul>
       </div>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <style scoped>
+.container {
+  background: url('../assets/images/bg-register.png') no-repeat;
+  background-size: 100%;
+  padding-top: 320px;
+
+  .main {
+    padding: 40px;
+    background: #fff;
+    border-radius: 32px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+  }
+}
 </style>

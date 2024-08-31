@@ -1,6 +1,7 @@
 import { createPinia, defineStore } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 // import { useRouter } from 'vue-router';
+import router from './router/index'
 
 
 // const router = useRouter();
@@ -22,11 +23,12 @@ const useUserStore = defineStore("user",
             register(newUser) {
                 const existingUser = this.users.find((u) => u.userName === newUser.userName);
                 if (existingUser) {
-                  alert('Username already exists. Please choose a different one.');
+                    alert('Username already exists. Please choose a different one.');
                 } else {
-                  this.users.push(newUser);
-                  localStorage.setItem('users', JSON.stringify(this.users));
-                  alert('Registration successful!');
+                    this.users.push(newUser);
+                    localStorage.setItem('users', JSON.stringify(this.users));
+                    alert('Registration successful!');
+                    router.replace("/login");
                 }
               },
             logout() {
@@ -46,8 +48,6 @@ const useUserStore = defineStore("user",
                 } else {
                     alert('Login failed: Incorrect username or password');
                 }
-                // this.loggedInUser = true;
-                // this.username = username;
             },
             loadUserFromLocalStorage() {
                 const user = JSON.parse(localStorage.getItem('loggedInUser'));

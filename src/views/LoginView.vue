@@ -29,35 +29,35 @@ const validatePassword = (blur) => {
   }
 }
 
-const doLogin = () => {
-    try {
-        if (userName.value == "") {
-            errors.value.username = "Please enter your username";
-            return;
-        }
-        if (password.value == "") {
-            errors.value.password = "Please enter your password";
-            return;
-        }
-
-        userStore.login(userName.value, password.value);
-        const role = JSON.parse(localStorage.getItem('loggedInUser')).role
-
-        if (role === 'admin') {
-          router.replace("/home");
-        } else if (role === 'user') {
-          router.replace("/about");
-        } else {
-          // router.push('/guest-dashboard');
-        }
-    }
-    finally {
-        // loginLoading.value = false;
-    }
-
 const toRegister = () => {
   router.replace("/register");
 }
+
+const doLogin = () => {
+  try {
+    if (userName.value == "") {
+        errors.value.username = "Please enter your username";
+      return;
+    }
+    if (password.value == "") {
+      errors.value.password = "Please enter your password";
+      return;
+    }
+    userStore.login(userName.value, password.value);
+
+    const role = JSON.parse(localStorage.getItem('loggedInUser')).role
+    if (role === 'admin') {
+      router.replace("/home");
+    } else if (role === 'user') {
+      router.replace("/about");
+    } else {
+      router.replace("/about");
+    }
+  }
+
+  finally {
+      // loginLoading.value = false;
+  }
 }
 
 </script>
@@ -95,10 +95,10 @@ const toRegister = () => {
           <div v-if="errors.password" class="text-danger">{{ errors.password }}</div>
         </div>
       </div>
-      <button @click="doLogin" type="submit" >Sign in</button>
+      <button @click="doLogin" type="submit" >Login</button>
 
       <div class="mt-4">Don't have an account?
-        <button class="join mt-2" @click="toRegister">Join today</button>
+        <button class="join mt-2" type="button"  @click="toRegister">Join today</button>
       </div>
   </div>
 </div>

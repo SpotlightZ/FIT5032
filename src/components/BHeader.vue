@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Menubar from 'primevue/menubar';
 import { useUserStore } from '@/store';
 import router from '@/router/index'
@@ -11,31 +11,47 @@ const toLogout = () => {
   router.replace("/login");
 }
 
-const items = ref([
-  {
-    label: 'Pet List',
-    items: [
-        { label: 'Find a Pet', command: () => this.handleClick('find') },
-        { label: 'Adopt a Pet', command: () => router.push('/home') }
-    ]
-  },
-  {
-    label: 'Our Work',
-    items: [
-      { label: ' Articles & Resources', command: () => this.handleClick('articles') }
-    ]
-  },
-  {
+const menuItems = computed(() => {
+  const items = []
+  items.push({
     label: 'About Us',
     items: [
       { label: 'Who We Are', command: () => router.push('/about') },
-      { label: 'Staff', command: () => this.handleClick('staff') }
+      { label: 'Staff', command: () => router.push('/staff') }
     ]
   },
   {
-    label: 'Contact Us', command: () => this.handleClick('contact')
+    label: 'Contact Us', command: () => router.push('/contact') 
+  })
+  
+  if (userStore.isAdmin) {
+    items.push(
+      {
+        label: 'Manage pet list', command: () => router.push('/managePet')
+      }
+    )
   }
-])
+  
+  if (userStore.isAdmin || userStore.isUser) {
+    items.push(
+      {
+        label: 'Pet List',
+        items: [
+          { label: 'Find a Pet', command: () => router.push('/find') },
+          { label: 'Adopt a Pet', command: () => router.push('/adopt') }
+        ]
+      },
+      {
+        label: 'Our Work',
+        items: [
+          { label: 'Articles & Resources', command: () => router.push('/Articles') }
+        ]
+      },
+    )
+  };
+  return items;
+})
+
 
 
 
@@ -49,7 +65,7 @@ let userRole = getUserRole()
 </script>
 
 <template>
-  <Menubar :model="items">
+  <Menubar :model="menuItems">
     <template #end>
       <div class="flex items-center gap-2">
         <div class="logout row justify-content-end text-center">

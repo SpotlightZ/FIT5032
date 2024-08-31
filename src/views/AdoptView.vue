@@ -1,7 +1,5 @@
 <script setup>
 import { ref } from 'vue'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
 
 const formData = ref({
   firstname: '',
@@ -46,6 +44,21 @@ const errors = ref({
   reason: null
 })
 
+const validateEmail = (blur) => {
+  const email = formData.value.email
+  const minLength = 5
+  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const emailVerify = emailPattern.test(email)
+
+  if (email.length < minLength) {
+    if (blur) errors.value.email = `Password must be at least ${minLength} characters long.`
+  } else if (!emailVerify) {
+    if (blur) errors.value.email = 'The entered email format is incorrect.'
+  } else {
+    errors.value.email = null
+  }
+}
+
 const validateFName = (blur) => {
   if (formData.value.firstname.length < 3) {
     if (blur) errors.value.firstname = 'First Name must be at least 3 characters'
@@ -61,21 +74,6 @@ const validateLName = (blur) => {
     errors.value.lastname = null
   }
 
-const validateEmail = (blur) => {
-
-  const email = formData.value.email
-  const minLength = 5
-  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  const emailVerify = emailPattern.test(email)
-
-  if (email.length < minLength) {
-    if (blur) errors.value.email = `Password must be at least ${minLength} characters long.`
-  } else if (!emailVerify) {
-    if (blur) errors.value.email = 'The entered email format is incorrect.'
-  } else {
-    errors.value.email = null
-  }
-}
 }
 </script>
 
@@ -96,8 +94,8 @@ const validateEmail = (blur) => {
                 type="text"
                 class="form-control"
                 id="firstname"
-                @blur="() => validateName(true)"
-                @input="() => validateName(false)"
+                @blur="() => validateFName(true)"
+                @input="() => validateFName(false)"
                 v-model="formData.firstname"
               />
               <div v-if="errors.firstname" class="text-danger">{{ errors.firstname }}</div>
@@ -109,8 +107,8 @@ const validateEmail = (blur) => {
                 type="text"
                 class="form-control"
                 id="lastname"
-                @blur="() => validateFName(true)"
-                @input="() => validateFName(false)"
+                @blur="() => validateLName(true)"
+                @input="() => validateLName(false)"
                 v-model="formData.lastname"
               />
               <div v-if="errors.lastname" class="text-danger">{{ errors.lastname }}</div>

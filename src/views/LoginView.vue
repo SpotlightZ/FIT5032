@@ -64,12 +64,12 @@ const doLogin = () => {
 
 <template>
 <div class="login">
-  <h1>FIT5032 Assessment Web App</h1>
+  <h1 class="fs-1">FIT5032 Assessment Web App</h1>
   <div class="col-3 login-box">
-    <h4 class="text-center">Welcome to Login</h4>
+    <h4 class="text-center fs-3">Welcome to Login</h4>
       <div class="row mb-3">
         <div>
-          <label for="username" class="form-label">Username</label>
+          <label for="username" class="form-label fs-6">Username</label>
           <input
             type="text"
             class="form-control"
@@ -83,7 +83,7 @@ const doLogin = () => {
         </div>
 
         <div>
-          <label for="password" class="form-label">Password</label>
+          <label for="password" class="form-label fs-6">Password</label>
           <input
             type="password"
             class="form-control"

@@ -24,7 +24,7 @@ const items = ref([
     </div>
     <div class="row">
       <div class="col-12">
-        <h2 class="text-center my-4">Articles & Resources</h2>
+        <h2 class="text-center">Articles & Resources</h2>
       </div>
     </div>
     <div class="d-flex flex-wrap mt-3">

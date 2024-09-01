@@ -7,13 +7,15 @@ import FooterNav from '@/components/FooterNav.vue'
 <template>
   <div>
     <BHeader class="b-header"></BHeader>
-    <router-view class="main" />
+    <div class="main">
+      <router-view />
+    </div>
     <FooterNav />
   </div>
 </template>
 
 <style scoped>
-/* .b-header {
+.b-header {
   position: fixed;
   top: 0;
   z-index: 1000;
@@ -21,5 +23,5 @@ import FooterNav from '@/components/FooterNav.vue'
 }
 .main {
   margin-top: 52px;
-} */
+}
 </style>

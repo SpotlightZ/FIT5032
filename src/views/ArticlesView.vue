@@ -18,15 +18,15 @@ const items = ref([
   <div>
     <div class="bg row align-items-center">
       <div>
-        <h1 class="text-center fs-1">Fulfilling Friendships</h1>
-        <p class="text-center fs-3">Real-life stories of unconditional love, companionship, and limitless snuggles</p>
+        <h1 class="text-center fs-1">Companion Connection</h1>
+        <p class="text-center fs-3">Companionship to senior individuals through pet ownership, while saving the lives of companion animals in shelters</p>
       </div>
     </div>
     <div class="container">
       <div class="row mt-5">
-      <div class="col-12">
-        <h2 class="text-center">Articles & Resources</h2>
-      </div>
+        <div class="col-12">
+          <h2 class="text-center">Articles & Resources</h2>
+        </div>
       </div>
       <div class="d-flex flex-wrap mt-3">
         <div class="p-2 masonry-item" v-for="item in items" :key="item.id" style="flex: 1 0 21%;">

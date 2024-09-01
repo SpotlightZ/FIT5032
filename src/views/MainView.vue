@@ -1,5 +1,6 @@
 <script setup>
 import BHeader from '@/components/BHeader.vue'
+import FooterNav from '@/components/FooterNav.vue'
 
 </script>
 
@@ -7,6 +8,7 @@ import BHeader from '@/components/BHeader.vue'
   <div>
     <BHeader></BHeader>
     <router-view/>
+    <FooterNav />
   </div>
 </template>
 

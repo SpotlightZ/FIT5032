@@ -63,9 +63,9 @@ const toSubmit = () => {
 
   <div class="container mt-5">
     <Fieldset legend="Who we are?">
-      <p class="m-0">The Pets for the Elderly Foundation (PFE) is a 501 (c)(3) public charity whose mission is to provide companionship to senior individuals through pet ownership, while saving the lives of companion animals in shelters; animals which might otherwise be destroyed due to lack of appropriate homes, and space limitations.</p>
+      <p class="m-0">The Pets for the Elderly Foundation (PFE) is a Monash public charity whose mission is to provide companionship to senior individuals through pet ownership, while saving the lives of companion animals in shelters; animals which might otherwise be destroyed due to lack of appropriate homes, and space limitations.</p>
       <br>
-      <p class="m-0">The program began in 1992 with two shelters near Cleveland, Ohio. Since then, PFE has seen great success and has grown to a nationwide program. PFE branched out nationally in 2002, and has helped successfully place over 100,000 companion animals with senior adopters.</p>
+      <p class="m-0">The program began in 2000 with two shelters near Melbourne, Victoria. Since then, PFE has seen great success and has grown to a nationwide program. PFE branched out nationally in 2002, and has helped successfully place over 100,000 companion animals with senior adopters.</p>
     </Fieldset>
 
     <Fieldset class="mt-5" legend="What We Do?">

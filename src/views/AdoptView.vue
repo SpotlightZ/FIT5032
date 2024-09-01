@@ -20,6 +20,7 @@ const submitForm = () => {
   if (!errors.value.firstname && !errors.value.lastname && !errors.value.email) {
     submittedCards.value.push({ ...formData.value })
     clearForm()
+    alert('success!');
   }
 }
 
@@ -79,6 +80,7 @@ const validateLName = (blur) => {
 
 <template>
   <!-- 🗄️ W3. Library Registration Form -->
+  <div class="bg" />
   <div class="container mt-5">
     <div class="row">
       <div class="col-md-8 offset-md-2">
@@ -180,4 +182,9 @@ const validateLName = (blur) => {
 </template>
 
 <style scoped>
+.bg {
+  background: url('../assets/images/bg-adopt.png') no-repeat;
+  background-position: center;
+  background-size: cover;
+}
 </style>

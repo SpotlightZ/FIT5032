@@ -15,29 +15,31 @@ const items = ref([
 
 <template>
   <!-- <div>This is a find pets page</div> -->
-  <div class="container">
+  <div>
     <div class="bg row align-items-center">
       <div>
         <h1 class="text-center fs-1">Fulfilling Friendships</h1>
         <p class="text-center fs-3">Real-life stories of unconditional love, companionship, and limitless snuggles</p>
       </div>
     </div>
-    <div class="row">
+    <div class="container">
+      <div class="row mt-5">
       <div class="col-12">
         <h2 class="text-center">Articles & Resources</h2>
       </div>
-    </div>
-    <div class="d-flex flex-wrap mt-3">
-      <div class="p-2 masonry-item" v-for="item in items" :key="item.id" style="flex: 1 0 21%;">
-        <Card>
-          <template #header>
-            <img :src="item.image" alt="Item Image" class="img-fluid">
-          </template>
-          <template #content>
-            <h5>{{ item.title }}</h5>
-            <p>{{ item.description }}</p>
-          </template>
-        </Card>
+      </div>
+      <div class="d-flex flex-wrap mt-3">
+        <div class="p-2 masonry-item" v-for="item in items" :key="item.id" style="flex: 1 0 21%;">
+          <Card>
+            <template #header>
+              <img :src="item.image" alt="Item Image" class="img-fluid">
+            </template>
+            <template #content>
+              <h5>{{ item.title }}</h5>
+              <p>{{ item.description }}</p>
+            </template>
+          </Card>
+        </div>
       </div>
     </div>
   </div>
@@ -46,6 +48,7 @@ const items = ref([
 <style scoped>
 .bg {
   background: url('../assets/images/bg-articles.png') no-repeat;
+  background-position: center;
   background-size: cover;
 }
 

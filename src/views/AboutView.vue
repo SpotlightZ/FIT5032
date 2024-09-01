@@ -67,7 +67,7 @@ const toSubmit = () => {
       <br>
       <p class="m-0">The program began in 1992 with two shelters near Cleveland, Ohio. Since then, PFE has seen great success and has grown to a nationwide program. PFE branched out nationally in 2002, and has helped successfully place over 100,000 companion animals with senior adopters.</p>
     </Fieldset>
-  
+
     <Fieldset class="mt-5" legend="What We Do?">
       <p class="m-0">The Pets for the Elderly Foundation helps pay the fees to participating animal shelters throughout the United States for senior citizens (age 60 and over) who adopt a companion dog or cat from a participating shelter – including pre-adoption veterinary exams and spay/neuter, if part of the adoption fee.</p>
       <br>
@@ -85,7 +85,8 @@ const toSubmit = () => {
 <style scoped>
 .bg {
   background: url('../assets/images/bg-about.png') no-repeat;
-  background-size: 100%;
+  background-position: center;
+  background-size: cover;
 }
 
 .p-rating-option-active .p-rating-icon {

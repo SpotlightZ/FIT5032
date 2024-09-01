@@ -65,14 +65,14 @@ const doLogin = () => {
 <template>
 <div class="login">
   <h1 class="fs-1">FIT5032 Assessment Web App</h1>
-  <div class="col-3 login-box">
+  <div class="col-lg-3 col-md-4 col-sm-8 login-box">
     <h4 class="text-center fs-3">Welcome to Login</h4>
       <div class="row mb-3">
         <div>
           <label for="username" class="form-label fs-6">Username</label>
           <input
             type="text"
-            class="form-control"
+            class="form-control fs-8"
             placeholder="Username"
             id="username"
             @blur="() => validateName(true)"
@@ -83,22 +83,22 @@ const doLogin = () => {
         </div>
 
         <div>
-          <label for="password" class="form-label fs-6">Password</label>
+          <label for="password" class="form-label fs-8">Password</label>
           <input
             type="password"
-            class="form-control"
+            class="form-control fs-8"
             placeholder="password"
               @blur="() => validatePassword(true)"
               @input="() => validatePassword(false)"
             v-model="password"
             />  
-          <div v-if="errors.password" class="text-danger">{{ errors.password }}</div>
+          <div v-if="errors.password" class="text-danger fs-8">{{ errors.password }}</div>
         </div>
       </div>
-      <button @click="doLogin" type="submit" >Login</button>
+      <button @click="doLogin" class="fs-8" type="submit" >Login</button>
 
-      <div class="mt-4">Don't have an account?
-        <button class="join mt-2" type="button"  @click="toRegister">Join today</button>
+      <div class="mt-4 fs-8">Don't have an account?
+        <button class="join mt-2 fs-8" type="button"  @click="toRegister">Join today</button>
       </div>
   </div>
 </div>
@@ -110,7 +110,7 @@ const doLogin = () => {
   height: 100vh;
   padding: 40px;
   background: url('../assets/images/login.png') no-repeat;
-  background-size: 100%;
+  background-size: 100% 100%;
 }
 .login-box {
   position: absolute;
@@ -127,7 +127,6 @@ button {
   width: 100%;
   height: 40px;
   background: #674D3F;
-  /* background: #75A5FF; */
   color: #fff;
   border: none;
   border-radius: 16px;

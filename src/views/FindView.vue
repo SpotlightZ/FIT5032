@@ -19,7 +19,7 @@ const petList = ref([
   },
   {
     image: '/src/assets/images/pet4.jpg',
-    name: 'Summer,',
+    name: 'Summer',
     age: 8,
     shelter: 'KARES',
     description: "Summer, an 8-year old hound mix, was seen wandering in Kaloko on the west side of the Big Island of Hawaii. Worried forher well-being, several neighbors tried to come together and capture her."

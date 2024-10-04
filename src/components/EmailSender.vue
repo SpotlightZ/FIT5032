@@ -1,31 +1,44 @@
 <!-- EmailSender.vue -->
 <template>
-    <div class="email-sender">
-      <h2>给 {{ adopter.name }} 发送邮件</h2>
-      <form @submit.prevent="sendEmail">
-        <div class="form-group">
-          <label for="subject">邮件主题:</label>
-          <input type="text" v-model="emailData.subject" id="subject" required />
-        </div>
-        <div class="form-group">
-          <label for="message">邮件内容:</label>
-          <textarea v-model="emailData.message" id="message" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="attachment">添加附件:</label>
-          <input type="file" @change="handleFileChange" id="attachment" />
-        </div>
-        <button type="submit" class="btn btn-primary">发送邮件</button>
-        <button @click="closeSender" class="btn btn-secondary">取消</button>
-      </form>
+  <div class="email-sender">
+    <h2 v-if="isBulk">Send Bulk Email</h2>
+    <h2 v-else>Send Email to {{ adopters[0].name }}</h2>
+    
+    <!-- Display selected recipients -->
+    <div v-if="isBulk" class="selected-users">
+      <h3>Selected Recipients:</h3>
+      <ul>
+        <li v-for="adopter in adopters" :key="adopter.id">{{ adopter.email }}</li>
+      </ul>
     </div>
-  </template>
+    <form @submit.prevent="sendEmail">
+      <div class="form-group">
+        <label for="subject">Email Subject:</label>
+        <input type="text" v-model="emailData.subject" id="subject" required />
+      </div>
+      <div class="form-group">
+        <label for="message">Email Content:</label>
+        <textarea v-model="emailData.message" id="message" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="attachment">Add Attachment:</label>
+        <input type="file" @change="handleFileChange" id="attachment" />
+      </div>
+      <button type="submit" class="btn btn-primary">Send Email</button>
+      <button @click="closeSender" class="btn btn-secondary">Cancel</button>
+    </form>
+  </div>
+</template>
   
   <script>
   import axios from 'axios';
   
   export default {
-    props: ['adopter'],
+    props: {
+      adopter: {},
+      adopters: Array, // 现在接收多个 adopter
+      isBulk: Boolean // 判断是否是批量邮件
+    },
     data() {
       return {
         emailData: {
@@ -45,7 +58,15 @@
       async sendEmail() {
         try {
           const formData = new FormData();
-          formData.append('to', this.adopter.email);
+          if (this.isBulk) {
+            // 对于批量发送，将所有的邮箱加入
+            this.adopters.forEach(adopter => {
+              formData.append('to', adopter.email);
+            });
+          } else {
+            formData.append('to', this.adopters[0].email); // 单个邮件
+          }
+        //   formData.append('to', this.adopter.email);
           formData.append('subject', this.emailData.subject);
           formData.append('message', this.emailData.message);
           if (this.emailData.attachment) {

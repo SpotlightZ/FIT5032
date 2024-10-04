@@ -36,7 +36,7 @@ app.post('/api/send-email', upload.single('attachment'), async (req, res) => {
   }
 
   const msg = {
-    to,
+    to: recipient,
     from: 'dd.zheng.other@outlook.com', // 发件人邮箱，必须是已验证的 SendGrid 邮箱
     subject,
     text: message,

@@ -11,8 +11,14 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import App from './App.vue'
 
 import PrimeVue from 'primevue/config'
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+import Button from 'primevue/button';
 import Aura from '@primevue/themes/aura'
 import router from './router'
+import InputText from 'primevue/inputtext'
+import Paginator from 'primevue/paginator'
+
 
 
 // if (window.location.protocol !== 'https:') {
@@ -37,7 +43,10 @@ app.use(PrimeVue, { theme: { preset: Aura } })
 app.use(router)
 app.use(pinia)
 
-// app.component('DataTable', DataTable)
-// app.component('Column', Column)
+app.component('DataTable', DataTable)
+app.component('Column', Column)
+app.component('Button', Button)
+app.component('InputText', InputText)
+app.component('Paginator', Paginator);
 
 app.mount('#app')

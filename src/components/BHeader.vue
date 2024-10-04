@@ -27,7 +27,11 @@ const menuItems = computed(() => {
   if (userRole === 'admin') {
     items.push(
       {
-        label: 'Manage pet list', command: () => router.push('/managePet')
+        label: 'Manage list',
+        items: [
+          { label: 'Adopter', command: () => router.push('/adopter')},
+          { label: 'Pets', command: () => router.push('/managePet') },
+        ]
       }
     )
   }

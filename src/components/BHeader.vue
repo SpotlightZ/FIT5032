@@ -24,7 +24,7 @@ const menuItems = computed(() => {
     label: 'Contact Us', command: () => router.push('/contact') 
   })
   
-  if (userStore.isAdmin) {
+  if (userRole === 'admin') {
     items.push(
       {
         label: 'Manage pet list', command: () => router.push('/managePet')
@@ -32,7 +32,7 @@ const menuItems = computed(() => {
     )
   }
   
-  if (userStore.isAdmin || userStore.isUser) {
+  if (userRole === 'admin' || userRole === 'user') {
     items.push(
       {
         label: 'Pet List',

@@ -1,24 +1,31 @@
 <script setup>
 import { ref } from 'vue'
 import { useUserStore } from '@/store';
-import router from '../router/index'
+// import router from '../router/index'
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { useRouter } from "vue-router"
 
+const db = getFirestore()
 
-const userName = ref('');
+const router = useRouter()
+const auth = getAuth()
+
+const email = ref('');
 const password = ref('');
 const userStore = useUserStore();
 
 
 const errors = ref({
-  username: null,
+  email: null,
   password: null
 })
 
 const validateName = (blur) => {
-  if (userName.value == "") {
-    if (blur) errors.value.username = 'Please enter your username'
+  if (email.value == "") {
+    if (blur) errors.value.email = 'Please enter your email'
   } else {
-    errors.value.username = null
+    errors.value.email = null
   }
 }
 const validatePassword = (blur) => {
@@ -33,26 +40,51 @@ const toRegister = () => {
   router.replace("/register");
 }
 
+
+const signin = async () => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(getAuth(), email.value, password.value);
+    const user = userCredential.user;
+
+    const userDocRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const role = userData.role;  // 获取 role 字段
+
+      localStorage.setItem('loggedInUser', JSON.stringify(userData));
+
+      if (role === 'admin') {
+        router.replace("/about");
+      } else if (role === 'user') {
+        router.replace("/about");
+      } else {
+        router.replace("/about");
+      }
+    } else {
+      console.log("Error");
+    }
+  }catch (error) {
+      console.log(error);
+  }
+}
+
 const doLogin = () => {
   try {
-    if (userName.value == "") {
-        errors.value.username = "Please enter your username";
+    if (email.value == "") {
+        errors.value.email = "Please enter your email";
       return;
     }
     if (password.value == "") {
       errors.value.password = "Please enter your password";
       return;
     }
-    userStore.login(userName.value, password.value);
 
-    const role = JSON.parse(localStorage.getItem('loggedInUser')).role
-    if (role === 'admin') {
-      router.replace("/about");
-    } else if (role === 'user') {
-      router.replace("/about");
-    } else {
-      router.replace("/about");
-    }
+    signin();
+    // userStore.login(email.value, password.value);
+
+    // const role = JSON.parse(localStorage.getItem('loggedInUser')).role
+    // 
   }
 
   finally {
@@ -69,17 +101,17 @@ const doLogin = () => {
     <h4 class="text-center fs-3">Welcome to Login</h4>
       <div class="row mb-3">
         <div>
-          <label for="username" class="form-label fs-6">Username</label>
+          <label for="email" class="form-label fs-6">email</label>
           <input
             type="text"
             class="form-control fs-8"
-            placeholder="Username"
-            id="username"
+            placeholder="email"
+            id="email"
             @blur="() => validateName(true)"
             @input="() => validateName(false)"
-            v-model="userName"
+            v-model="email"
             />
-          <div v-if="errors.username" class="text-danger">{{ errors.username }}</div>
+          <div v-if="errors.email" class="text-danger">{{ errors.email }}</div>
         </div>
 
         <div>

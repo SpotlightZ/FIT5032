@@ -1,10 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import Menubar from 'primevue/menubar';
-import { useUserStore } from '@/store';
 import router from '@/router/index'
 
-const userStore = useUserStore();
 
 
 const menuItems = computed(() => {
@@ -22,7 +20,7 @@ const menuItems = computed(() => {
     ]
   })
   
-  if (userStore.isAdmin) {
+  if (userRole === 'admin') {
     items.push(
       {
         label: 'Manage pet list',
@@ -33,7 +31,7 @@ const menuItems = computed(() => {
     )
   }
   
-  if (userStore.isAdmin || userStore.isUser) {
+  if (userRole === 'admin' || userRole === 'user') {
     items.push(
       {
         label: 'Pet List',

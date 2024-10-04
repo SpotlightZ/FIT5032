@@ -71,7 +71,7 @@ const routes = [
   }
 ]
 
-let userStore = useUserStore;
+// let userStore = useUserStore;
 
 const router = createRouter({
   history: createWebHistory(),
@@ -85,9 +85,9 @@ function getUserAuthStatus() {
 
 router.beforeEach((to, _, next) => {
   const isAuthenticated = getUserAuthStatus();
-  if (!userStore) {
-    userStore = useUserStore();   
-  }
+  // if (!userStore) {
+  //   userStore = useUserStore();   
+  // }
 
   // if (to.path !== "/login" && !isAuthenticated) {
   if (to.path !== "/login" && to.path !== "/register" && !isAuthenticated) {

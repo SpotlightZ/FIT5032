@@ -74,7 +74,6 @@ const validateLName = (blur) => {
   } else {
     errors.value.lastname = null
   }
-
 }
 </script>
 

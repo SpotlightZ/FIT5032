@@ -1,10 +1,17 @@
 <script setup>
 import { ref } from 'vue'
 import { useUserStore } from '@/store';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { useRouter } from "vue-router";
 
+const router = useRouter()
+const auth = getAuth()
+
+const db = getFirestore()
 
 const formData = ref({
-  username: '',
+  email: '',
   password: '',
   confirmPassword: '',
   isAustralian: false,
@@ -15,22 +22,44 @@ const formData = ref({
 const submittedCards = ref([])
 
 const submitForm = () => {
-  validateName(true)
+  validateEmail(true)
   validatePassword(true)
-  if (!errors.value.username && !errors.value.password) {
-    // submittedCards.value.push({ ...formData.value })
-    useUserStore().register({
-      userName: formData.value.username,
-      password: formData.value.password,
-      role: formData.value.role
-    });
-    clearForm()
+  if (!errors.value.email && !errors.value.password) {
+    register()
   }
+}
+
+
+const register = () => {
+  createUserWithEmailAndPassword(auth, formData.value.email, formData.value.password)
+  .then((userCredential) => {
+    
+    const user = userCredential.user;
+    // console.log("Firebase Register Successful")
+
+    // 将用户的其他信息存储到 Firestore 的 'users' 集合中
+    setDoc(doc(db, "users", user.uid), {
+      
+        email: formData.value.email,
+        role: formData.value.role,  // 添加 role
+        isAustralian: formData.value.isAustralian,  // 其他字段
+        reason: formData.value.reason,
+        createdAt: new Date()  // 添加时间戳
+      }).then(() => {
+        console.log("User data successfully written to Firestore");
+        router.push("/login"); // 跳转到登录页面
+        clearForm()
+      }).catch((error) => {
+        console.error("Error writing document: ", error);
+      });
+  }).catch((error) => {
+    console.log("Error writing document: ", error);
+  })
 }
 
 const clearForm = () => {
   formData.value = {
-    username: '',
+    email: '',
     password: '',
     isAustralian: false,
     reason: '',
@@ -39,7 +68,7 @@ const clearForm = () => {
 }
 
 const errors = ref({
-  username: null,
+  email: null,
   password: null,
   confirmPassword: null,
   resident: null,
@@ -47,11 +76,18 @@ const errors = ref({
   reason: null
 })
 
-const validateName = (blur) => {
-  if (formData.value.username.length < 3) {
-    if (blur) errors.value.username = 'Name must be at least 3 characters'
+const validateEmail = (blur) => {
+  const email = formData.value.email
+  const minLength = 5
+  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const emailVerify = emailPattern.test(email)
+
+  if (email.length < minLength) {
+    if (blur) errors.value.email = `Password must be at least ${minLength} characters long.`
+  } else if (!emailVerify) {
+    if (blur) errors.value.email = 'The entered email format is incorrect.'
   } else {
-    errors.value.username = null
+    errors.value.email = null
   }
 }
 
@@ -105,22 +141,22 @@ const validateText = (blur) => {
         <form @submit.prevent="submitForm">
           <div class="row mb-3 mt-5">
             <div class="col-md-6 col-sm-6">
-              <label for="username" class="form-label">Username</label>
+              <label for="email" class="form-label">email</label>
               <input
                 type="text"
                 class="form-control"
-                id="username"
-                @blur="() => validateName(true)"
-                @input="() => validateName(false)"
-                v-model="formData.username"
+                id="email"
+                @blur="() => validateEmail(true)"
+                @input="() => validateEmail(false)"
+                v-model="formData.email"
               />
-              <div v-if="errors.username" class="text-danger">{{ errors.username }}</div>
+              <div v-if="errors.email" class="text-danger">{{ errors.email }}</div>
             </div>
 
             <div class="col-md-6 col-sm-6">
               <label for="role" class="form-label">Role</label>
               <select class="form-select" id="role" v-model="formData.role" required>
-                <option value="admin">Admin</option>
+                <!-- <option value="admin">Admin</option> -->
                 <option value="user">User</option>
                 <option value="guest">Guest</option>
               </select>
@@ -190,7 +226,7 @@ const validateText = (blur) => {
   <!-- <div class="row mt-5">
     <h4>This is a Primevue Datatable.</h4>
     <DataTable :value="submittedCards" tableStyle="min-width: 50rem">
-      <Column field="username" header="Username"></Column>
+      <Column field="email" header="email"></Column>
       <Column field="password" header="Password"></Column>
       <Column field="isAustralian" header="Australian Resident"></Column>
       <Column field="role" header="role"></Column>
@@ -208,7 +244,7 @@ const validateText = (blur) => {
       >
         <div class="card-header">User Information</div>
         <ul class="list-group list-group-flush">
-          <li class="list-group-item">Username: {{ card.username }}</li>
+          <li class="list-group-item">email: {{ card.email }}</li>
           <li class="list-group-item">Password: {{ card.password }}</li>
           <li class="list-group-item">
             Australian Resident: {{ card.isAustralian ? 'Yes' : 'No' }}

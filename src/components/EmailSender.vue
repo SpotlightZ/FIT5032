@@ -54,7 +54,8 @@
   
           // 发送邮件请求到后端 API
           const response = await axios.post('http://localhost:3000/api/send-email', formData);
-          console.log('Email sent successfully:', response.data);
+        //   console.log('Email sent successfully:', response.data);
+          alert('Email sent successfully!')
           this.closeSender();
         } catch (error) {
           console.error('Error sending email:', error);

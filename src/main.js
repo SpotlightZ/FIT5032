@@ -18,6 +18,7 @@ import Aura from '@primevue/themes/aura'
 import router from './router'
 import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
+import Dialog from 'primevue/dialog';
 
 
 
@@ -48,5 +49,6 @@ app.component('Column', Column)
 app.component('Button', Button)
 app.component('InputText', InputText)
 app.component('Paginator', Paginator);
+app.component('Dialog', Dialog);
 
 app.mount('#app')

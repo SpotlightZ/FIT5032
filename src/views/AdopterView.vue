@@ -52,7 +52,9 @@
       </div>
   
       <!-- Email Sender Component -->
-      <EmailSender v-if="selectedAdopter" :adopter="selectedAdopter" @close="closeEmailSender" />
+      <Dialog header="Send Email" v-model:visible="selectedAdopter" :modal="true" :closable="false" style="width: 80vw">
+        <EmailSender :adopter="selectedAdopter" @close="closeEmailSender" />
+      </Dialog>
     </div>
   </template>
   
@@ -109,9 +111,6 @@
     },
     methods: {
       openEmailSender(adopter) {
-        console.log('1');
-        console.log(adopter,'=adopter');
-        
         this.selectedAdopter = adopter;
       },
       closeEmailSender() {

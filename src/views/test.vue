@@ -76,7 +76,31 @@
     </div>
 </template>
 
-<script>
+<script>Bart Odgers	bodgers0@adobe.com
+Devora McLarens	dmclarens1@usda.gov
+Swen Spurrier	sspurrier2@ox.ac.uk
+Solomon McKevany	smckevany3@examiner.com
+Carmina Legendre	clegendre4@arstechnica.com
+Isabella Tunkin	itunkin5@mediafire.com
+Nancy Crenage	ncrenage6@ning.com
+Maurizio Duxbarry	mduxbarry7@yahoo.co.jp
+Dorene Malley	dmalley8@github.com
+Richard Maceur	rmaceur9@twitpic.com
+Edyth Van Niekerk	evana@nydailynews.com
+Madelena Parsonson	mparsonsonb@google.fr
+Bent Pearcy	bpearcyc@delicious.com
+Clayborne O'Sheils	cosheilsd@sourceforge.net
+Janith Kaplin	jkapline@google.it
+Ricard Rippon	rripponf@yahoo.com
+Raquela Frammingham	rframminghamg@kickstarter.com
+Millie Jindracek	mjindracekh@dell.com
+Cece Brockington	cbrockingtoni@intel.com
+William Yesinin	wyesininj@kickstarter.com
+Ariella D'Antuoni	adantuonik@nps.gov
+Lyell Pitsall	lpitsalll@hc360.com
+Miriam Gilluley	mgilluleym@narod.ru
+Blane Malley	bmalleyn@tamu.edu
+Lemmie Radolf	lradolfo@opensource.org
 import { FilterMatchMode } from '@primevue/core/api';
 import { CustomerService } from '@/service/CustomerService';
 

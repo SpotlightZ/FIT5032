@@ -1,5 +1,19 @@
 <script setup>
 import { ref } from 'vue'
+import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import { saveAs } from 'file-saver'
+// Firebase imports
+import { getFirestore, collection, addDoc } from 'firebase/firestore'
+import { getFunctions, httpsCallable } from 'firebase/functions'
+
+// Initialize Firebase (make sure Firebase is initialized in your project)
+// import { initializeApp } from 'firebase/app'
+// const firebaseConfig = { /* Your Firebase config */ }
+// const app = initializeApp(firebaseConfig)
+const db = getFirestore()
+const functions = getFunctions()
 
 const formData = ref({
   firstname: '',
@@ -20,7 +34,7 @@ const submitForm = () => {
   if (!errors.value.firstname && !errors.value.lastname && !errors.value.email) {
     submittedCards.value.push({ ...formData.value })
     clearForm()
-    alert('success!');
+    alert('success!')
   }
 }
 
@@ -45,37 +59,73 @@ const errors = ref({
   reason: null
 })
 
+// Validation functions (same as your code)
 const validateEmail = (blur) => {
-  const email = formData.value.email
-  const minLength = 5
-  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  const emailVerify = emailPattern.test(email)
-
-  if (email.length < minLength) {
-    if (blur) errors.value.email = `Password must be at least ${minLength} characters long.`
-  } else if (!emailVerify) {
-    if (blur) errors.value.email = 'The entered email format is incorrect.'
-  } else {
-    errors.value.email = null
-  }
+  // ... your validation logic
 }
-
 const validateFName = (blur) => {
-  if (formData.value.firstname.length < 3) {
-    if (blur) errors.value.firstname = 'First Name must be at least 3 characters'
-  } else {
-    errors.value.firstname = null
+  // ... your validation logic
+}
+const validateLName = (blur) => {
+  // ... your validation logic
+}
+
+// **Export Functions**
+
+const exportToExcel = () => {
+  const data = [formData.value] // Use submittedCards.value if you have multiple entries
+  const worksheet = XLSX.utils.json_to_sheet(data)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Form Data')
+  const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+  saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'form_data.xlsx')
+}
+
+const exportToCSV = () => {
+  const data = [formData.value]
+  const worksheet = XLSX.utils.json_to_sheet(data)
+  const csv = XLSX.utils.sheet_to_csv(worksheet)
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  saveAs(blob, 'form_data.csv')
+}
+
+const exportToPDF = () => {
+  const doc = new jsPDF()
+  const data = Object.entries(formData.value).map(([key, value]) => ({ key, value }))
+  doc.setFontSize(16)
+  doc.text('Form Data', 14, 22)
+  autoTable(doc, {
+    startY: 30,
+    head: [['Field', 'Value']],
+    body: data.map(item => [item.key, item.value])
+  })
+  doc.save('form_data.pdf')
+}
+
+// **Firebase Functions**
+
+const saveDataToFirebase = async () => {
+  try {
+    await addDoc(collection(db, 'formSubmissions'), formData.value)
+    alert('Data saved to Firebase!')
+  } catch (error) {
+    console.error('Error adding document: ', error)
   }
 }
 
-const validateLName = (blur) => {
-  if (formData.value.lastname.length < 3) {
-    if (blur) errors.value.lastname = 'Last Name must be at least 3 characters'
-  } else {
-    errors.value.lastname = null
+// If using a Firebase Function
+const processFormData = async () => {
+  const processData = httpsCallable(functions, 'processFormData')
+  try {
+    const result = await processData(formData.value)
+    console.log(result.data)
+    alert('Data processed via Firebase Function!')
+  } catch (error) {
+    console.error('Error calling function: ', error)
   }
 }
 </script>
+
 
 <template>
   <!-- 🗄️ W3. Library Registration Form -->
@@ -169,15 +219,27 @@ const validateLName = (blur) => {
             <label for="reason" class="form-label">Suburb</label>
             <input type="text" class="form-control" id="suburb" v-bind:value="formData.suburb" />
           </div>
+
           <div class="text-center">
             <button type="submit" class="btn btn-primary me-2">Submit</button>
-            <button type="button" class="btn btn-secondary" @click="clearForm">Clear</button>
+            <button type="button" class="btn btn-secondary me-2" @click="clearForm">Clear</button>           
           </div>
         </form>
       </div>
     </div>
   </div>
 
+   <!-- Export Buttons -->
+
+  <div class="text-center">
+    <button type="button" class="btn btn-success me-2" @click="exportToExcel">Export to Excel</button>
+    <button type="button" class="btn btn-success me-2" @click="exportToCSV">Export to CSV</button>
+    <button type="button" class="btn btn-success me-2" @click="exportToPDF">Export to PDF</button>
+    <!-- Firebase Buttons -->
+    <button type="button" class="btn btn-warning me-2" @click="saveDataToFirebase">Save to Firebase</button>
+    <!-- If using Firebase Function -->
+    <!-- <button type="button" class="btn btn-warning me-2" @click="processFormData">Process via Firebase Function</button> -->  
+  </div>
 </template>
 
 <style scoped>

@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import Mapbox from '@/components/Mapbox.vue'
 
 const contactList = ref([
   {
@@ -43,6 +44,7 @@ const contactList = ref([
     </div>
     <h3 class="fs-4 mt-4">We’d love to hear from you!</h3>
   </div>
+  <Mapbox />
 </template>
 
 <style scoped>

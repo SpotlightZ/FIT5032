@@ -1,124 +1,132 @@
 <template>
-    <div class="container">
-      <h1>Admin Dashboard</h1>
-  
-      <!-- Adopters Management Table -->
-      <h2>Adopters Management</h2>
-      <div class="datatable-filter">
-        <DataTable 
-          :value="adopters" 
-          paginator 
-          :rows="10" 
-          :filters="adopterFilters" 
-          dataKey="id"
-          :globalFilterFields="['name', 'email']" 
-          :filterDisplay="'row'"
-          :sortField="sortField" 
-          :sortOrder="sortOrder"
-          selection-mode="multiple"
-          v-model:selection="selectedAdopters"
-        >
-          <template #header>
-            <div class="flex justify-end">
-              <IconField>
-                <InputIcon>
-                  <i class="pi pi-search" />
-                </InputIcon>
-                <InputText v-model="adopterFilters['global'].value" placeholder="Keyword Search" />
-              </IconField>
-            </div>
+  <div class="container">
+    <h1>Admin Dashboard</h1>
+
+    <!-- Adopters Management Table -->
+    <h2>Adopters Management</h2>
+    <div class="datatable-filter">
+      <DataTable 
+        :value="adopters" 
+        paginator 
+        :rows="10" 
+        :filters="adopterFilters" 
+        dataKey="id"
+        :globalFilterFields="['name', 'email']" 
+        :filterDisplay="'row'"
+        :sortField="sortField" 
+        :sortOrder="sortOrder"
+        selection-mode="multiple"
+        v-model:selection="selectedAdopters"
+      >
+        <template #header>
+          <div class="flex justify-end">
+            <IconField>
+              <InputIcon>
+                <i class="pi pi-search" />
+              </InputIcon>
+              <InputText v-model="adopterFilters['global'].value" placeholder="Keyword Search" />
+            </IconField>
+          </div>
+        </template>
+        <template #empty> No adopter found. </template>
+        <Column selectionMode="multiple" headerStyle="width: 3em"></Column>
+        <Column field="name" header="Adopter Name" sortable filter filterPlaceholder="Search by name">
+          <template #filter>
+            <InputText v-model="adopterFilters['name'].value" placeholder="Search by name" />
           </template>
-          <template #empty> No adopter found. </template>
-          <Column selectionMode="multiple" headerStyle="width: 3em"></Column>
-          <Column field="name" header="Adopter Name" sortable filter filterPlaceholder="Search by name">
-            <template #filter>
-              <InputText v-model="adopterFilters['name'].value" placeholder="Search by name" />
-            </template>
-          </Column>
-          <Column field="email" header="Adopter Email" sortable filter filterPlaceholder="Search by email">
-            <template #filter>
-              <InputText v-model="adopterFilters['email'].value" placeholder="Search by email" />
-            </template>
-          </Column>
-          <Column header="Actions">
-            <template #body="slotProps">
-              <Button label="Send Email" icon="pi pi-envelope" @click="openEmailSender(slotProps.data)" />
-            </template>
-          </Column>
-        </DataTable>
-      </div>
-
-
-
-
-  
-      <!-- Donors Management Table -->
-      <h2>Donors Management</h2>
-      <div class="datatable-filter">
-        <DataTable 
-          :value="donors" 
-          paginator 
-          :rows="10" 
-          :filters="donorFilters" 
-          :globalFilterFields="['name', 'email', 'amount']" 
-          :filterDisplay="'menu'"
-          :sortField="sortField" 
-          :sortOrder="sortOrder"
-          selection-mode="multiple"
-          v-model:selection="selectedAdopters"
-        >
-          <template #header>
-            <div class="flex justify-end">
-              <IconField>
-                <InputIcon>
-                  <i class="pi pi-search" />
-                </InputIcon>
-                <InputText v-model="donorFilters['global'].value" placeholder="Keyword Search" />
-              </IconField>
-            </div>
+        </Column>
+        <Column field="email" header="Adopter Email" sortable filter filterPlaceholder="Search by email">
+          <template #filter>
+            <InputText v-model="adopterFilters['email'].value" placeholder="Search by email" />
           </template>
-          <template #empty> No donor found. </template>
-          <Column selectionMode="multiple" headerStyle="width: 3em"></Column>
-          <Column field="name" header="Donor Name" sortable filter filterPlaceholder="Search by name">
-            <template #filter>
-              <InputText v-model="donorFilters['name'].value" placeholder="Search by name" />
-            </template>
-          </Column>
-          <Column field="email" header="Donor Email" sortable filter filterPlaceholder="Search by email">
-            <template #filter>
-              <InputText v-model="donorFilters['email'].value" placeholder="Search by email" />
-            </template>
-          </Column>
-          <Column field="amount" header="Donation Amount" sortable filter filterPlaceholder="Search by amount">
-            <template #filter>
-              <InputText v-model="donorFilters['amount'].value" placeholder="Search by amount" />
-            </template>
-          </Column>
-          <Column header="Actions">
-            <template #body="slotProps">
-              <Button label="Send Email" icon="pi pi-envelope" @click="openEmailSender(slotProps.data)" />
-            </template>
-          </Column>
-        </DataTable>
-      </div>
-
-      <Button label="Send Bulk Email" icon="pi pi-send" @click="openBulkEmailSender" :disabled="!selectedAdopters.length" />
-  
-      <!-- Email Sender Component -->
-      <Dialog header="Send Email" v-model:visible="isDialog" :modal="true" :closable="false" style="width: 80vw">
-        <EmailSender :adopters="selectedAdopter" @close="closeEmailSender" />
-      </Dialog>
-
-      <!-- Bulk Email Dialog -->
-      <Dialog header="Send Bulk Email" v-model:visible="bulkEmailDialogVisible" :modal="true" :closable="false" style="width: 80vw">
-        <EmailSender :adopters="selectedAdopters" @close="closeBulkEmailSender" isBulk />
-      </Dialog>
+        </Column>
+        <Column header="Actions">
+          <template #body="slotProps">
+            <Button label="Send Email" icon="pi pi-envelope" @click="openEmailSender(slotProps.data)" />
+          </template>
+        </Column>
+      </DataTable>
     </div>
-  </template>
+
+    <!-- Donors Management Table -->
+    <h2>Donors Management</h2>
+    <div class="datatable-filter">
+      <DataTable 
+        :value="donors" 
+        paginator 
+        :rows="10" 
+        :filters="donorFilters" 
+        :globalFilterFields="['name', 'email', 'amount']" 
+        :filterDisplay="'menu'"
+        :sortField="sortField" 
+        :sortOrder="sortOrder"
+        selection-mode="multiple"
+        v-model:selection="selectedAdopters"
+      >
+        <template #header>
+          <div class="flex justify-end">
+            <IconField>
+              <InputIcon>
+                <i class="pi pi-search" />
+              </InputIcon>
+              <InputText v-model="donorFilters['global'].value" placeholder="Keyword Search" />
+            </IconField>
+          </div>
+        </template>
+        <template #empty> No donor found. </template>
+        <Column selectionMode="multiple" headerStyle="width: 3em"></Column>
+        <Column field="name" header="Donor Name" sortable filter filterPlaceholder="Search by name">
+          <template #filter>
+            <InputText v-model="donorFilters['name'].value" placeholder="Search by name" />
+          </template>
+        </Column>
+        <Column field="email" header="Donor Email" sortable filter filterPlaceholder="Search by email">
+          <template #filter>
+            <InputText v-model="donorFilters['email'].value" placeholder="Search by email" />
+          </template>
+        </Column>
+        <Column field="amount" header="Donation Amount" sortable filter filterPlaceholder="Search by amount">
+          <template #filter>
+            <InputText v-model="donorFilters['amount'].value" placeholder="Search by amount" />
+          </template>
+        </Column>
+        <Column header="Actions">
+          <template #body="slotProps">
+            <Button label="Send Email" icon="pi pi-envelope" @click="openEmailSender(slotProps.data)" />
+          </template>
+        </Column>
+      </DataTable>
+    </div>
+    <Button label="Send Bulk Email" icon="pi pi-send" @click="openBulkEmailSender" :disabled="!selectedAdopters.length" />
+
+    <!-- Email Sender Component -->
+    <Dialog header="Send Email" v-model:visible="isDialog" :modal="true" :closable="false" style="width: 80vw">
+      <EmailSender :adopters="selectedAdopter" @close="closeEmailSender" />
+    </Dialog>
+    <!-- Bulk Email Dialog -->
+    <Dialog header="Send Bulk Email" v-model:visible="bulkEmailDialogVisible" :modal="true" :closable="false" style="width: 80vw">
+      <EmailSender :adopters="selectedAdopters" @close="closeBulkEmailSender" isBulk />
+    </Dialog>
+
+
+
+     <!-- Export Buttons -->
+    <div class="text-center">
+      <!-- 其他按钮 -->
+      <button type="button" class="btn btn-success me-2" @click="exportUserData('excel')">Export All to Excel</button>
+      <button type="button" class="btn btn-success me-2" @click="exportUserData('csv')">Export All to CSV</button>
+      <button type="button" class="btn btn-success me-2" @click="exportUserData('pdf')">Export All to PDF</button>
+    </div>
+  </div>
+</template>
   
   <script>
   import EmailSender from '@/components/EmailSender.vue'
 
+  import * as XLSX from 'xlsx'
+  import jsPDF from 'jspdf'
+  import autoTable from 'jspdf-autotable'
+  import { saveAs } from 'file-saver'
   import { ref } from 'vue';
   
   export default {
@@ -242,6 +250,103 @@
       closeBulkEmailSender() {
         this.bulkEmailDialogVisible = false;
       },
+
+
+      // 通用导出函数
+      async exportUserData(format) {
+        switch (format) {
+              case 'excel':
+                this.exportAsExcel(this.donors);
+                break;
+              case 'csv':
+                this.exportAsCSV(this.donors);
+                break;
+              case 'pdf':
+                this.exportAsPDF(this.donors);
+                break;
+              default:
+                alert('Unsupported export format.');
+            }
+        // const email = formData.value.user;
+        // if (!email) {
+        //   alert('Please log in first.');
+        //   return;
+        // }
+      
+        // const userExists = await checkUserExists(email);
+      
+        // if (userExists) {
+        //   const userData = await fetchUserData(email);
+        
+        //   if (userData) {
+        //     switch (format) {
+        //       case 'excel':
+        //         this.exportAsExcel(userData);
+        //         break;
+        //       case 'csv':
+        //         this.exportAsCSV(userData);
+        //         break;
+        //       case 'pdf':
+        //         this.exportAsPDF(userData);
+        //         break;
+        //       default:
+        //         alert('Unsupported export format.');
+        //     }
+        //   } else {
+        //     alert('Error fetching user data.');
+        //   }
+        // } else {
+        //   alert('Please complete the adoption application form first.');
+        // }
+      },
+
+      // 导出为 Excel
+      exportAsExcel(userData) {
+        const worksheet = XLSX.utils.json_to_sheet(userData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Form Data');
+        const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'form_data.xlsx');
+      },
+
+      // 导出为 CSV
+      exportAsCSV(userData) {
+        const worksheet = XLSX.utils.json_to_sheet(userData);
+        const csv = XLSX.utils.sheet_to_csv(worksheet);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, 'form_data.csv');
+      },
+
+      // 导出为 PDF
+      exportAsPDF(userData) {
+        if (userData && userData.length > 0) {
+          const doc = new jsPDF();
+          const data = userData.map(item => [
+            // item.firstname,
+            // item.lastname,
+            item.id,
+            item.name,
+            item.email,
+            item.amount,
+            // item.gender,
+            // item.isAustralian ? 'Yes' : 'No',
+            // item.reason,
+            // item.suburb
+          ]);
+        
+          doc.setFontSize(16);
+          doc.text('Form Data', 14, 22);
+          autoTable(doc, {
+            startY: 30,
+            head: [['ID', 'Name', 'Email', 'Amount']],
+            body: data
+            // head: [['First Name', 'Last Name', 'Email', 'Gender', 'Australian Resident', 'Reason', 'Suburb']],
+          });
+          doc.save('form_data.pdf');
+        } else {
+          alert('No data available for PDF export.');
+        }
+      }
     },
   };
   </script>

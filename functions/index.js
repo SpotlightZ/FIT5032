@@ -15,10 +15,24 @@ admin.initializeApp();
 
 exports.saveFormData = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
+    // 处理 OPTIONS 请求
+    if (req.method === "OPTIONS") {
+      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Allow-Methods", "GET, POST");
+      res.set("Access-Control-Allow-Headers", "Content-Type");
+      res.set("Access-Control-Max-Age", "3600");
+      return res.status(204).send("");
+    }
+
+    // 检查请求方法是否为 POST
+    if (req.method !== "POST") {
+      return res.status(405).send("Method Not Allowed");
+    }
+
     try {
       const data = req.body;
-      // 将数据保存到 Firestore 的 "formSubmissions" 集合中
       await admin.firestore().collection("formSubmissions").add(data);
+      res.set("Access-Control-Allow-Origin", "*");
       res.status(200).send({message: "Data saved successfully!"});
     } catch (error) {
       console.error("Error saving form data: ", error);
@@ -47,6 +61,63 @@ exports.getFormData = functions.https.onRequest((req, res) => {
       res.status(500).send("Error fetching form data");
     }
   });
+});
+
+exports.checkUserExists = functions.https.onRequest(async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "POST");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).send("");
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).send("Method Not Allowed");
+  }
+
+  const {email} = req.body;
+
+  try {
+    const snapshot = await admin.firestore().collection("formSubmissions")
+        .where("user", "==", email)
+        .limit(1)
+        .get();
+
+    const exists = !snapshot.empty;
+    res.status(200).send({exists});
+  } catch (error) {
+    console.error("Error checking user: ", error);
+    res.status(500).send("Error checking user");
+  }
+});
+
+exports.getUserData = functions.https.onRequest(async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "POST");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+
+  const {email} = req.body;
+
+  try {
+    const snapshot = await admin.firestore().collection("formSubmissions")
+        .where("user", "==", email)
+        .get();
+
+    if (snapshot.empty) {
+      return res.status(404).send("User not found");
+    }
+
+    const userData = [];
+    snapshot.forEach((doc) => {
+      userData.push({id: doc.id, ...doc.data()});
+    });
+
+    res.status(200).send(userData);
+  } catch (error) {
+    console.error("Error fetching user data: ", error);
+    res.status(500).send("Error fetching user data");
+  }
 });
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started

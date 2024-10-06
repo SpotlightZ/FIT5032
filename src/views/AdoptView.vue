@@ -1,12 +1,10 @@
 <script setup>
 import { ref } from 'vue'
-import * as XLSX from 'xlsx'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
-import { saveAs } from 'file-saver'
 // Firebase imports
 import { getFirestore, collection, addDoc } from 'firebase/firestore'
 import { getFunctions, httpsCallable } from 'firebase/functions'
+import axios from 'axios';
+import { onBeforeMount } from 'vue';
 
 // Initialize Firebase (make sure Firebase is initialized in your project)
 // import { initializeApp } from 'firebase/app'
@@ -14,8 +12,13 @@ import { getFunctions, httpsCallable } from 'firebase/functions'
 // const app = initializeApp(firebaseConfig)
 const db = getFirestore()
 const functions = getFunctions()
+const formDataList = ref([]);
+
+const functionURL = import.meta.env.VITE_FUNCTION_URL;
+const isDisable = false;
 
 const formData = ref({
+  user: '',
   firstname: '',
   lastname: '',
   email: '',
@@ -25,18 +28,73 @@ const formData = ref({
   suburb: ''
 })
 
+formData.value.user = JSON.parse(localStorage.getItem('loggedInUser')).email;
+
 const submittedCards = ref([])
 
-const submitForm = () => {
-  validateFName(true)
-  validateLName(true)
-  validateEmail(true)
+const submitForm = async () => {
+  validateFName(true);
+  validateLName(true);
+  validateEmail(true);
   if (!errors.value.firstname && !errors.value.lastname && !errors.value.email) {
-    submittedCards.value.push({ ...formData.value })
-    clearForm()
-    alert('success!')
+    try {
+      const userExists = await checkUserExists(formData.value.user);
+      
+      if (userExists) {
+        alert('You have already submitted a claim application, please wait.');
+      } else {
+        await axios.post(`${functionURL}/saveFormData`, formData.value, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        alert('Data saved successfully!');
+        clearForm();
+      }
+    } catch (error) {
+      console.error('Error saving data: ', error);
+      alert('Error saving data');
+    }
   }
-}
+};
+
+const fetchFormData = async () => {
+  try {
+    const response = await axios.get(`${functionURL}/getFormData`);
+    formDataList.value = response.data;
+  } catch (error) {
+    console.error('Error fetching data: ', error);
+  }
+};
+
+const checkUserExists = async (email) => {
+  try {
+    const response = await axios.post(`${functionURL}/checkUserExists`, { email }, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data.exists;
+  } catch (error) {
+    console.error('Error checking user: ', error);
+    return false;
+  }
+};
+
+// 获取用户数据的函数
+const fetchUserData = async (email) => {
+  try {
+    const response = await axios.post(`${functionURL}/getUserData`, { email }, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user data: ', error);
+    return null;
+  }
+};
 
 const clearForm = () => {
   formData.value = {
@@ -51,55 +109,45 @@ const clearForm = () => {
 }
 
 const errors = ref({
+  user: null,
   firstname: null,
   lastname: null,
   email: null,
   resident: null,
   gender: null,
-  reason: null
+  reason: null,
+  suburb: null
 })
 
-// Validation functions (same as your code)
 const validateEmail = (blur) => {
-  // ... your validation logic
+  const email = formData.value.email
+  const minLength = 5
+  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const emailVerify = emailPattern.test(email)
+
+  if (email.length < minLength) {
+    if (blur) errors.value.email = 'Password must be at least ${minLength} characters long.'
+  } else if (!emailVerify) {
+    if (blur) errors.value.email = 'The entered email format is incorrect.'
+  } else {
+    errors.value.email = null
+  }
 }
+
 const validateFName = (blur) => {
-  // ... your validation logic
+  if (formData.value.firstname.length < 3) {
+    if (blur) errors.value.firstname = 'First Name must be at least 3 characters'
+  } else {
+    errors.value.firstname = null
+  }
 }
+
 const validateLName = (blur) => {
-  // ... your validation logic
-}
-
-// **Export Functions**
-
-const exportToExcel = () => {
-  const data = [formData.value] // Use submittedCards.value if you have multiple entries
-  const worksheet = XLSX.utils.json_to_sheet(data)
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Form Data')
-  const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-  saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'form_data.xlsx')
-}
-
-const exportToCSV = () => {
-  const data = [formData.value]
-  const worksheet = XLSX.utils.json_to_sheet(data)
-  const csv = XLSX.utils.sheet_to_csv(worksheet)
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  saveAs(blob, 'form_data.csv')
-}
-
-const exportToPDF = () => {
-  const doc = new jsPDF()
-  const data = Object.entries(formData.value).map(([key, value]) => ({ key, value }))
-  doc.setFontSize(16)
-  doc.text('Form Data', 14, 22)
-  autoTable(doc, {
-    startY: 30,
-    head: [['Field', 'Value']],
-    body: data.map(item => [item.key, item.value])
-  })
-  doc.save('form_data.pdf')
+  if (formData.value.lastname.length < 3) {
+    if (blur) errors.value.lastname = 'Last Name must be at least 3 characters'
+  } else {
+    errors.value.lastname = null
+  }
 }
 
 // **Firebase Functions**
@@ -139,6 +187,19 @@ const processFormData = async () => {
         </p>
         <form @submit.prevent="submitForm">
           <div class="row mb-3">
+            <div>
+              <label for="firstname" class="form-label">user</label>
+              <input
+                type="text"
+                class="form-control"
+                id="user"
+                disabled
+                @blur="() => validateFName(true)"
+                @input="() => validateFName(false)"
+                v-model="formData.user"
+              />
+              <div v-if="errors.user" class="text-danger">{{ errors.user }}</div>
+            </div>
             <div>
               <label for="firstname" class="form-label">First Name</label>
               <input
@@ -202,7 +263,7 @@ const processFormData = async () => {
             </div>
           </div>
           <div class="mb-3">
-            <label for="reason" class="form-label">Reason for joining</label>
+            <label for="reason" class="form-label">Reason for applying</label>
             <textarea
               class="form-control"
               id="reason"
@@ -216,8 +277,11 @@ const processFormData = async () => {
             </div>
           </div>
           <div class="mb-3">
-            <label for="reason" class="form-label">Suburb</label>
+            <label for="suburb" class="form-label">Suburb</label>
             <input type="text" class="form-control" id="suburb" v-bind:value="formData.suburb" />
+            <div v-if="errors.suburb" class="text-succeeful">
+              {{ errors.suburb }}
+            </div>
           </div>
 
           <div class="text-center">
@@ -229,17 +293,7 @@ const processFormData = async () => {
     </div>
   </div>
 
-   <!-- Export Buttons -->
 
-  <div class="text-center">
-    <button type="button" class="btn btn-success me-2" @click="exportToExcel">Export to Excel</button>
-    <button type="button" class="btn btn-success me-2" @click="exportToCSV">Export to CSV</button>
-    <button type="button" class="btn btn-success me-2" @click="exportToPDF">Export to PDF</button>
-    <!-- Firebase Buttons -->
-    <button type="button" class="btn btn-warning me-2" @click="saveDataToFirebase">Save to Firebase</button>
-    <!-- If using Firebase Function -->
-    <!-- <button type="button" class="btn btn-warning me-2" @click="processFormData">Process via Firebase Function</button> -->  
-  </div>
 </template>
 
 <style scoped>

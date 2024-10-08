@@ -6,7 +6,7 @@ import { getFunctions, httpsCallable } from 'firebase/functions'
 import axios from 'axios';
 import { onBeforeMount } from 'vue';
 
-import FullCalendar from '@/components/FullCalendar.vue'
+// import FullCalendar from '@/components/FullCalendar.vue'
 
 // Initialize Firebase (make sure Firebase is initialized in your project)
 // import { initializeApp } from 'firebase/app'

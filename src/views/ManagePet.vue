@@ -1,16 +1,16 @@
 <script>
-  import Mapbox from '@/components/Mapbox.vue'
+  import GenAI from '@/components/GenAI.vue'
 
   export default {
     components: {
-      Mapbox,
+      GenAI,
     },
   }
 </script>
 
 <template>
   <div>This is a manage pets page</div>
-  <Mapbox></Mapbox>
+  <GenAI></GenAI>
 </template>
 
 <style scoped>

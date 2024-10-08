@@ -15,6 +15,8 @@ admin.initializeApp();
 
 const db = admin.firestore();
 
+const GEMINI_API_KEY = functions.config().gemini.key;
+
 exports.saveFormData = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     // 处理 OPTIONS 请求
@@ -162,6 +164,52 @@ exports.bookAppointment = functions.https.onRequest(async (req, res) => {
     console.error("Error booking appointment:", error);
     res.status(500).send("Error booking appointment");
   }
+});
+
+
+exports.generateText = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("Access-Control-Allow-Methods", "POST");
+    res.set("Access-Control-Allow-Headers", "Content-Type");
+
+    if (req.method !== "POST") {
+      return res.status(405).json({error: "Method not allowed"});
+    }
+
+    const {prompt} = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({error: "Prompt is required"});
+    }
+
+    try {
+      // eslint-disable-next-line no-undef
+      const response = await axios.post(
+          "https://api.gemini.google.com/v1/generate", // Replace with actual Gemini API endpoint
+          {
+            prompt: prompt,
+            max_tokens: 150, // Example parameter
+            temperature: 0.7, // Example parameter
+          // Add other necessary parameters as per Gemini API documentation
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${GEMINI_API_KEY}`,
+            },
+          },
+      );
+
+      // eslint-disable-next-line max-len
+      const generatedText = response.data.text; // Adjust based on actual response structure
+      return res.status(200).json({generatedText});
+    } catch (error) {
+      // eslint-disable-next-line max-len
+      console.error("Error communicating with Gemini API:", error.response ? error.response.data : error.message);
+      return res.status(500).json({error: "Failed to generate text"});
+    }
+  });
 });
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started

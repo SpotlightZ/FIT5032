@@ -10,6 +10,7 @@ const cors = require('cors'); // 允许跨域请求
 
 const app = express();
 const upload = multer({ dest: 'uploads/' }); // 文件上传目录
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // 使用 JSON 中间件
 app.use(express.json());
@@ -53,6 +54,41 @@ app.post('/api/send-email', upload.single('attachment'), async (req, res) => {
     res.status(500).send({ error: 'Failed to send email' });
   }
 });
+
+// 生成文本的 API 端点
+app.post('/api/generate', async (req, res) => {
+  const { prompt } = req.body;
+
+  if (!prompt) {
+    return res.status(400).json({ error: 'Missing prompt parameter' });
+  }
+
+  try {
+    // 使用您提供的代码初始化 Gemini API
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const chat = model.startChat({
+      history: [
+        {
+          role: "user",
+          parts: [{ text: "Hello" }],
+        },
+        {
+          role: "model",
+          parts: [{ text: "Great to meet you. What would you like to know?" }],
+        },
+      ],
+    });
+    let result = await chat.sendMessage(prompt);
+    const generatedText = result.response.text();
+
+    res.json({ generatedText });
+  } catch (error) {
+    console.error('Error communicating with Gemini API:', error.response ? error.response.data : error.message);
+    res.status(500).json({ error: 'Failed to generate text' });
+  }
+});
+
 
 // 监听端口
 const PORT = process.env.PORT || 3000;

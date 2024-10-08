@@ -80,7 +80,7 @@ const routes = [
 // let userStore = useUserStore;
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/sub3-yiting/'),
   routes
 })
 

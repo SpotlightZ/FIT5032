@@ -13,6 +13,8 @@ const cors = require("cors")({origin: true});
 
 admin.initializeApp();
 
+const db = admin.firestore();
+
 exports.saveFormData = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     // 处理 OPTIONS 请求
@@ -117,6 +119,48 @@ exports.getUserData = functions.https.onRequest(async (req, res) => {
   } catch (error) {
     console.error("Error fetching user data: ", error);
     res.status(500).send("Error fetching user data");
+  }
+});
+
+// 云函数：获取所有预约数据
+exports.getAppointments = functions.https.onRequest(async (_req, res) => {
+  try {
+    const snapshot = await db.collection("appointments").get();
+    const appointments = snapshot.docs.map((doc) => doc.data());
+    res.status(200).send(appointments);
+  } catch (error) {
+    console.error("Error fetching appointments:", error);
+    res.status(500).send("Error fetching appointments");
+  }
+});
+
+// 云函数：预约处理逻辑
+exports.bookAppointment = functions.https.onRequest(async (req, res) => {
+  const {firstname, lastname, email, date} = req.body;
+
+  try {
+    // 检查是否有冲突的预约
+    const existingAppointments = await db.collection("appointments")
+        .where("date", "==", date)
+        .get();
+
+    if (!existingAppointments.empty) {
+      // eslint-disable-next-line max-len
+      return res.status(400).send({message: "This time slot is already booked!"});
+    }
+
+    // 保存新的预约
+    await db.collection("appointments").add({
+      firstname,
+      lastname,
+      email,
+      date,
+    });
+
+    res.status(200).send({message: "Appointment booked successfully!"});
+  } catch (error) {
+    console.error("Error booking appointment:", error);
+    res.status(500).send("Error booking appointment");
   }
 });
 // Create and deploy your first functions

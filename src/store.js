@@ -11,11 +11,7 @@ pinia.use(piniaPluginPersistedstate);
 const useUserStore = defineStore("user",
     {
         state: () => ({
-            users: [
-                { userName: 'admin', password: 'Zxc1234,', role: 'admin' },
-                { userName: 'user', password: 'Zxc1234,', role: 'user' },
-                { userName: 'guest', password: 'Zxc1234,', role: 'guest' }
-            ],
+            users: [],
             loggedInUser: null,
         }),
         actions: {
@@ -26,7 +22,7 @@ const useUserStore = defineStore("user",
                     alert('Username already exists. Please choose a different one.');
                 } else {
                     this.users.push(newUser);
-                    localStorage.setItem('users', JSON.stringify(this.users));
+                    // localStorage.setItem('users', JSON.stringify(this.users));
                     alert('Registration successful!');
                     router.replace("/login");
                 }
@@ -55,7 +51,7 @@ const useUserStore = defineStore("user",
                     this.loggedInUser = user;
                 }
                 // load all of users from local storage
-                const storedUsers = JSON.parse(localStorage.getItem('users'));
+                // const storedUsers = JSON.parse(localStorage.getItem('users'));
                 if (storedUsers) {
                   this.users = storedUsers;
                 }

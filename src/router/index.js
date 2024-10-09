@@ -72,7 +72,7 @@ const routes = [
         path: 'articles',
         name: 'Articles',
         component: ArticlesView
-      }
+      },
     ]
   }
 ]

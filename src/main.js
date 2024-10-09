@@ -5,12 +5,16 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
-import { initializeApp } from "firebase/app";
-
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import App from './App.vue'
 
 import PrimeVue from 'primevue/config'
+
+// // PrimeVue 样式
+// import 'primevue/resources/themes/saga-blue/theme.css';      // 主题
+// import 'primevue/resources/primevue.min.css';                // 样式
+// import 'primeicons/primeicons.css';    
+
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 import Button from 'primevue/button';
@@ -19,6 +23,12 @@ import router from './router'
 import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
 import Dialog from 'primevue/dialog';
+import ToastService from 'primevue/toastservice';
+import Toast from 'primevue/toast';
+import Chart from 'primevue/chart';
+import Dropdown from 'primevue/dropdown';
+
+import { initializeApp } from "firebase/app";
 
 
 
@@ -43,6 +53,7 @@ pinia.use(piniaPluginPersistedstate)
 app.use(PrimeVue, { theme: { preset: Aura } })
 app.use(router)
 app.use(pinia)
+app.use(ToastService);
 
 app.component('DataTable', DataTable)
 app.component('Column', Column)
@@ -50,5 +61,8 @@ app.component('Button', Button)
 app.component('InputText', InputText)
 app.component('Paginator', Paginator);
 app.component('Dialog', Dialog);
+app.component('Toast', Toast);
+app.component('Chart', Chart);
+app.component('Dropdown', Dropdown);
 
 app.mount('#app')

@@ -127,7 +127,6 @@
   import jsPDF from 'jspdf'
   import autoTable from 'jspdf-autotable'
   import { saveAs } from 'file-saver'
-  import { ref } from 'vue';
   
   export default {
     components: {
@@ -236,7 +235,6 @@
     methods: {
       openEmailSender(adopter) {
         this.selectedAdopter.push(adopter)
-        console.log(this.selectedAdopter,'=d');
         this.isDialog = true;
         // this.selectedAdopter = adopter;
       },

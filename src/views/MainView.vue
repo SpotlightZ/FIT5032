@@ -9,6 +9,7 @@ import FooterNav from '@/components/FooterNav.vue'
     <BHeader class="b-header"></BHeader>
     <div class="main">
       <router-view />
+      <Toast />
     </div>
     <FooterNav />
   </div>

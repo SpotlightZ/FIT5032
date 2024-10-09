@@ -1,13 +1,10 @@
 <script>
   import GenAI from '@/components/GenAI.vue'
-  import { ref, onMounted } from 'vue';
-  import db from '../firebase/init.js';
-  import { collection, getDocs, query, where, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
-  // import Chart from 'primevue/chart';
-  // import DataTable from 'primevue/datatable';
-  // import Column from 'primevue/column';
-  // import Button from 'primevue/button';
-  // import Card from 'primevue/card';
+  import NumList from '@/components/NumList.vue'
+  import { ref, onMounted, nextTick } from 'vue';
+  import { db, storage } from '../firebase/init.js'; // 使用命名导入
+  import { collection, getDocs, getDoc, query, where, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+  import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
   import Toast from 'primevue/toast';
   import { useToast } from 'primevue/usetoast';
 
@@ -15,12 +12,7 @@
     name: 'AdminDashboard',
     components: {
       GenAI,
-      // Chart,
-      // DataTable,
-      // Column,
-      // Button,
-      // Card,
-      Toast,
+      NumList,
     },
     setup() {
       const usersCount = ref(0);
@@ -254,11 +246,229 @@
           ],
         };
       };
+
+
+      // Staff 管理部分
+      const staffs = ref([]);
+      const selectedStaffs = ref([]);
+      const fileUploadRef = ref(null);
+      const addStaffDialogVisible = ref(false);
+      const newStaff = ref({
+        id: '',
+        avatar: '',
+        name: '',
+        position: '',
+        describe: '',
+      });
+
+      const editStaffDialogVisible = ref(false);
+      const editStaff = ref({
+        id: '',
+        name: '',
+        position: '',
+        describe: '',
+        avatar: '',
+      });
+
+      const deleteStaffDialogVisible = ref(false);
+      const staffToDelete = ref({});
+      // Filters for Staff DataTable
+      const staffFilters = ref({
+        'id': { value: null, matchMode: 'contains' },
+        'name': { value: null, matchMode: 'contains' },
+        'position': { value: null, matchMode: 'contains' },
+        'describe': { value: null, matchMode: 'contains' },
+      });
+      
+      // Fetch staffs from Firestore
+      const fetchStaffs = async () => {
+        try {
+          const staffsCollection = collection(db, 'staff');
+          const staffsSnapshot = await getDocs(staffsCollection);
+          staffs.value = staffsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+        } catch (error) {
+          console.error('Error fetching staffs:', error);
+          toast.add({ severity: 'error', summary: '错误', detail: '获取 Staff 数据失败。', life: 3000 });
+        }
+      };
+
+      // 添加新 Staff
+      const addStaff = async () => {
+        // 表单验证
+        if (!newStaff.value.id || !newStaff.value.avatar || !newStaff.value.name || !newStaff.value.position || !newStaff.value.describe) {
+          toast.add({ severity: 'warn', summary: '警告', detail: '请填写所有字段。', life: 3000 });
+          return;
+        }
+
+        try {
+          const staffsCollection = collection(db, 'staff');
+          await addDoc(staffsCollection, {
+            id: newStaff.value.id,
+            avatar: newStaff.value.avatar,
+            name: newStaff.value.name,
+            position: newStaff.value.position,
+            describe: newStaff.value.describe,
+            createdAt: serverTimestamp(),
+          });
+          toast.add({ severity: 'success', summary: '成功', detail: 'Staff 添加成功。', life: 3000 });
+          addStaffDialogVisible.value = false;
+          newStaff.value = { id: '', avatar: '', name: '', position: '', describe: '' };
+          fetchStaffs();
+        } catch (error) {
+          console.error('Error adding staff:', error);
+          toast.add({ severity: 'error', summary: '错误', detail: '添加 Staff 失败。', life: 3000 });
+        }
+      };
+  
+      // 显示编辑 Staff Dialog 并填充数据
+      const showEditStaffDialog = (staff) => {
+        editStaff.value = { ...staff };
+        editStaffDialogVisible.value = true;
+      };
+  
+      // 更新 Staff
+      const updateStaff = async () => {
+        if (!editStaff.value.id || !editStaff.value.name || !editStaff.value.position || !editStaff.value.describe) {
+          toast.add({ severity: 'warn', summary: '警告', detail: '请填写所有字段。', life: 3000 });
+          return;
+        }
+      
+        try {
+          const staffRef = doc(db, 'staff', editStaff.value.id);
+          const staffDoc = await getDoc(staffRef);
+        
+          if (!staffDoc.exists()) {
+            console.error('Error: Staff document does not exist.');
+            toast.add({ severity: 'error', summary: '错误', detail: '该 Staff 文档不存在。', life: 3000 });
+            return;
+          }
+        
+          await updateDoc(staffRef, {
+            avatar: editStaff.value.avatar,
+            name: editStaff.value.name,
+            position: editStaff.value.position,
+            describe: editStaff.value.describe,
+          });
+        
+          toast.add({ severity: 'success', summary: '成功', detail: 'Staff 更新成功。', life: 3000 });
+          editStaffDialogVisible.value = false;
+          fetchStaffs();
+        } catch (error) {
+          console.error('Error updating staff:', error);
+          toast.add({ severity: 'error', summary: '错误', detail: '更新 Staff 失败。', life: 3000 });
+        }
+      };
+
+
+      // 确认删除 Staff
+      const confirmDeleteStaff = (staff) => {
+        staffToDelete.value = staff;
+        deleteStaffDialogVisible.value = true;
+      };
+  
+      // 删除 Staff
+      const deleteStaff = async () => {
+        try {
+          const staffRef = doc(db, 'staff', staffToDelete.value.id);
+          await deleteDoc(staffRef);
+          toast.add({ severity: 'success', summary: '成功', detail: 'Staff 删除成功。', life: 3000 });
+          deleteStaffDialogVisible.value = false;
+          fetchStaffs();
+        } catch (error) {
+          console.error('Error deleting staff:', error);
+          toast.add({ severity: 'error', summary: '错误', detail: '删除 Staff 失败。', life: 3000 });
+        }
+      };
+
+      // Staff 过滤
+      const onStaffFilter = (event) => {
+        staffFilters.value = event.filters;
+      };
+
+      const onUpload = () => {
+          toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
+      };
+
+      
+      const selectedFile = ref(null); // 用于存储选择的文件
+
+      // 当用户选择文件时触发
+      const onFileSelect = (event) => {
+        if (event.files && event.files.length > 0) {
+          selectedFile.value = event.files[0];
+        }
+      };
+
+      // 处理 Staff Avatar 上传
+      const handleStaffAvatarUpload = async () => {
+        
+        // const file = fileUploadRef.value.files[0];
+        const file = selectedFile.value;
+        if (!file) {
+          toast.add({ severity: 'warn', summary: '警告', detail: '请选择一个文件。', life: 3000 });
+          return;
+        }
+
+        const storageReference = storageRef(storage, `staffAvatars/${newStaff.value.id}_${Date.now()}_${file.name}`);
+
+        try {
+          await uploadBytes(storageReference, file);
+          const downloadURL = await getDownloadURL(storageReference);
+          newStaff.value.avatar = downloadURL;
+          toast.add({ severity: 'success', summary: '成功', detail: '头像上传成功。', life: 3000 });
+        } catch (error) {
+          console.error('Error uploading avatar:', error);
+          toast.add({ severity: 'error', summary: '错误', detail: '头像上传失败。', life: 3000 });
+        }
+      };
+
+
+      // 处理编辑 Staff Avatar 上传
+      const handleEditStaffAvatarUpload = async (event) => {
+        const file = selectedFile.value;
+        if (!file) {
+          toast.add({ severity: 'warn', summary: '警告', detail: '请选择一个文件。', life: 3000 });
+          return;
+        }
+
+        const storageReference = storageRef(storage, `staffAvatars/${editStaff.value.id}_${Date.now()}_${file.name}`);
+
+        try {
+          await uploadBytes(storageReference, file);
+          const downloadURL = await getDownloadURL(storageReference);
+          editStaff.value.avatar = downloadURL;
+          toast.add({ severity: 'success', summary: '成功', detail: '头像上传成功。', life: 3000 });
+        } catch (error) {
+          console.error('Error uploading avatar:', error);
+          toast.add({ severity: 'error', summary: '错误', detail: '头像上传失败。', life: 3000 });
+        }
+      };
+
+      // 显示添加 Staff Dialog
+      const showAddStaffDialog = () => {
+        addStaffDialogVisible.value = true;
+      };
+
+      // 格式化日期（可选）
+      const formatStaffDate = (rowData) => {
+        if (rowData.createdAt && rowData.createdAt.toDate) {
+          return rowData.createdAt.toDate().toLocaleString();
+        }
+        return '';
+      };
+
+      
+
+
   
       onMounted(async () => {
         await fetchUsers();
-        await fetchCounts();
+        // await fetchCounts();
         await fetchApplications();
+        fetchStaffs();
         renderCharts();
       });
   
@@ -287,6 +497,31 @@
         confirmDeleteUser,
         deleteUser,
         formatDate,
+        
+        // Staff 管理相关
+        staffs,
+        selectedStaffs,
+        addStaffDialogVisible,
+        newStaff,
+        showAddStaffDialog,
+        addStaff,
+        editStaffDialogVisible,
+        editStaff,
+        showEditStaffDialog,
+        updateStaff,
+        deleteStaffDialogVisible,
+        staffToDelete,
+        confirmDeleteStaff,
+        deleteStaff,
+        formatDate,
+        onStaffFilter,
+        staffFilters,
+  
+        // FileUpload 相关
+        handleStaffAvatarUpload,
+        handleEditStaffAvatarUpload,
+        onUpload,
+        onFileSelect,
       };
     },
   }
@@ -296,12 +531,13 @@
   <div class="admin-dashboard">
       <h1>Admin Dashboard</h1>
       <div class="charts">
-        <Card title="Users Overview">
+        <NumList></NumList>
+        <!-- <Card title="Users Overview">
           <Chart type="pie" :data="usersChartData" :options="chartOptions" />
         </Card>
         <Card title="Adopters Count">
           <Chart type="bar" :data="adoptersChartData" :options="chartOptions" />
-        </Card>
+        </Card> -->
       </div>
       <div class="data-tables">
         <Card title="Users Overview">
@@ -311,7 +547,7 @@
           </DataTable>
         </Card>
   
-        <Card title="Adoption Applications">
+        <!-- <Card title="Adoption Applications">
           <DataTable :value="applications" responsiveLayout="scroll">
             <Column field="userId" header="User ID"></Column>
             <Column field="petId" header="Pet ID"></Column>
@@ -335,78 +571,207 @@
               </template>
             </Column>
           </DataTable>
-        </Card>
+        </Card> -->
 
         <div class="user-management">
           <div class="header">
-            <h2>用户管理</h2>
-            <Button label="添加用户" icon="pi pi-plus" class="p-button-success" @click="showAddUserDialog" />
+            <h2>User Management</h2>
+            <Button label="Add User" icon="pi pi-plus" class="p-button-success" @click="showAddUserDialog" />
           </div>
 
           <DataTable :value="users" paginator :rows="10" responsiveLayout="scroll">
-            <Column field="name" header="姓名"></Column>
-            <Column field="email" header="邮箱"></Column>
-            <Column field="role" header="角色"></Column>
-            <Column field="createdAt" header="创建时间" :body="formatDate"></Column>
-            <Column header="操作">
+            <Column field="name" header="name"></Column>
+            <Column field="email" header="email"></Column>
+            <Column field="role" header="role"></Column>
+            <Column field="createdAt" header="create time" :body="formatDate"></Column>
+            <Column header="operation" class="buttons">
               <template #body="slotProps">
-                <Button label="编辑" icon="pi pi-pencil" class="p-button-rounded p-button-info p-mr-2" @click="showEditUserDialog(slotProps.data)" />
-                <Button label="删除" icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="confirmDeleteUser(slotProps.data)" />
+                <Button label="Edit" icon="pi pi-pencil" class="p-button-rounded p-button-info p-mr-2" @click="showEditUserDialog(slotProps.data)" />
+                <Button label="Delete" icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="confirmDeleteUser(slotProps.data)" />
+              </template>
+            </Column>
+          </DataTable>
+        </div>
+
+        <!-- Staff 管理部分 -->
+        <div class="staff-management">
+          <div class="header">
+          <h2>Staff Management</h2>
+          <Button label="Add Staff" icon="pi pi-plus" class="p-button-success" @click="showAddStaffDialog" />
+          </div>
+
+          <DataTable 
+            :value="staffs" 
+            paginator 
+            :rows="10" 
+            responsiveLayout="scroll" 
+            selectionMode="multiple" 
+            v-model:selection="selectedStaffs"
+            sortMode="multiple"
+            filterDisplay="row"
+            :filters="staffFilters"
+            @filter="onStaffFilter"
+          >
+          <Column selectionMode="multiple" headerStyle="width: 3em"></Column>
+          <Column field="id" header="ID" sortable filter filterPlaceholder="SearchID"></Column>
+          <Column field="avatar" header="avatar">
+            <template #body="slotProps">
+              <img :src="slotProps.data.avatar" alt="Avatar" class="avatar-image" />
+            </template>
+          </Column>
+          <Column field="name" header="name" sortable filter filterPlaceholder="search name"></Column>
+          <Column field="position" header="position" sortable filter filterPlaceholder="search position"></Column>
+          <Column field="describe" header="describe" sortable filter filterPlaceholder="search describe"></Column>
+          <Column header="operation" :style="{ width: '200px' }">
+            <template #body="slotProps" class="buttons">
+              <Button label="" icon="pi pi-pencil" class="p-button-rounded p-button-info p-mr-2 mr-1" @click="showEditStaffDialog(slotProps.data)" />
+              <Button icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="confirmDeleteStaff(slotProps.data)" />
               </template>
             </Column>
           </DataTable>
         </div>
 
         <!-- 添加用户 Dialog -->
-        <Dialog header="添加用户" :visible.sync="addUserDialogVisible" modal>
+        <Dialog header="Add User" :visible.sync="addUserDialogVisible" modal>
           <div class="p-fluid">
             <div class="p-field">
-              <label for="name">姓名</label>
+              <label for="name" class="col-1">name</label>
               <InputText id="name" v-model="newUser.name" />
             </div>
             <div class="p-field">
-              <label for="email">邮箱</label>
+              <label for="email" class="col-1">email</label>
               <InputText id="email" v-model="newUser.email" />
             </div>
             <div class="p-field">
-              <label for="role">角色</label>
-              <Dropdown id="role" v-model="newUser.role" :options="roles" placeholder="选择角色" />
+              <label for="role" class="col-1">role</label>
+              <Dropdown id="role" v-model="newUser.role" :options="roles" placeholder="select role" />
             </div>
           </div>
           <template #footer>
-            <Button label="取消" icon="pi pi-times" class="p-button-text" @click="addUserDialogVisible = false" />
-            <Button label="保存" icon="pi pi-check" class="p-button-text" @click="addUser" />
+            <Button label="cancel" icon="pi pi-times" class="p-button-text" @click="addUserDialogVisible = false" />
+            <Button label="save" icon="pi pi-check" class="p-button-text" @click="addUser" />
           </template>
         </Dialog>
 
         <!-- 编辑用户 Dialog -->
-        <Dialog header="编辑用户" :visible.sync="editUserDialogVisible" modal>
+        <Dialog header="Edit User" :visible.sync="editUserDialogVisible" modal>
           <div class="p-fluid">
             <div class="p-field">
-              <label for="edit-name">姓名</label>
+              <label for="edit-name" class="col-1">name</label>
               <InputText id="edit-name" v-model="editUser.name" />
             </div>
             <div class="p-field">
-              <label for="edit-email">邮箱</label>
+              <label for="edit-email" class="col-1">email</label>
               <InputText id="edit-email" v-model="editUser.email" />
             </div>
             <div class="p-field">
-              <label for="edit-role">角色</label>
-              <Dropdown id="edit-role" v-model="editUser.role" :options="roles.value" placeholder="选择角色" />
+              <label for="edit-role" class="col-1">role</label>
+              <Dropdown id="edit-role" v-model="editUser.role" :options="roles.value" placeholder="select role" />
             </div>
           </div>
           <template #footer>
-            <Button label="取消" icon="pi pi-times" class="p-button-text" @click="editUserDialogVisible = false" />
-            <Button label="保存" icon="pi pi-check" class="p-button-text" @click="updateUser" />
+            <Button label="cancel" icon="pi pi-times" class="p-button-text" @click="editUserDialogVisible = false" />
+            <Button label="save" icon="pi pi-check" class="p-button-text" @click="updateUser" />
           </template>
         </Dialog>
 
         <!-- 确认删除 Dialog -->
-        <Dialog header="确认删除" :visible.sync="deleteUserDialogVisible" modal>
-          <p>您确定要删除用户 <strong>{{ userToDelete.name }}</strong> 吗？</p>
+        <Dialog header="Confirm Delete" :visible.sync="deleteUserDialogVisible" modal>
+          <p>Are you sure you want to delete <strong>{{ userToDelete.name }}</strong> user?</p>
           <template #footer>
-            <Button label="取消" icon="pi pi-times" class="p-button-text" @click="deleteUserDialogVisible = false" />
-            <Button label="删除" icon="pi pi-trash" class="p-button-text p-button-danger" @click="deleteUser" />
+            <Button label="cancel" icon="pi pi-times" class="p-button-text" @click="deleteUserDialogVisible = false" />
+            <Button label="delete" icon="pi pi-trash" class="p-button-text p-button-danger" @click="deleteUser" />
+          </template>
+        </Dialog>
+
+        <!-- 添加 Staff Dialog -->
+        <Dialog header="添加 Staff" :visible.sync="addStaffDialogVisible" modal class="col-8">
+          <div class="p-fluid">
+            <div class="p-field">
+              <label for="staff-id" class="col-1">ID</label>
+              <InputText id="staff-id" v-model="newStaff.id" />
+            </div>
+            <div class="p-field">
+              <label for="staff-avatar" class="col-1">avatar</label>
+              <FileUpload 
+                ref="fileUploadRef"
+                mode="basic"
+                name="avatar" 
+                url="#" 
+                :customUpload="true" 
+                :auto="false"
+                :maxFileSize="1000000"
+                accept="image/*"
+                @select="onFileSelect"
+              />
+              <Button label="upload avatar" @click="handleStaffAvatarUpload" />
+            </div>
+            <div class="p-field">
+              <label for="staff-name" class="col-1">name</label>
+              <InputText id="staff-name" v-model="newStaff.name" />
+            </div>
+            <div class="p-field">
+              <label for="staff-position" class="col-1">position</label>
+              <InputText id="staff-position" v-model="newStaff.position" />
+            </div>
+            <div class="p-field">
+              <label for="staff-describe" class="col-1">describe</label>
+              <InputText id="staff-describe" class="col-10" v-model="newStaff.describe" />
+            </div>
+          </div>
+          <template #footer>
+            <Button label="cancel" icon="pi pi-times" class="p-button-text" @click="addStaffDialogVisible = false" />
+            <Button label="save" icon="pi pi-check" class="p-button-text" @click="addStaff" />
+          </template>
+        </Dialog>
+  
+        <!-- 编辑 Staff Dialog -->
+        <Dialog header="Edit Staff" :visible.sync="editStaffDialogVisible" modal class="col-8">
+          <div class="p-fluid">
+          <div class="p-field">
+            <label for="edit-staff-id" class="col-1">ID</label>
+            <InputText id="edit-staff-id" v-model="editStaff.id" disabled />
+          </div>
+          <div class="p-field">
+            <label for="edit-staff-avatar" class="col-1">avatar</label>
+            <FileUpload 
+              ref="fileUploadRef"
+              mode="basic"
+              name="avatar" 
+              url="#" 
+              :customUpload="true" 
+              :auto="false"
+              :maxFileSize="1000000"
+              accept="image/*"
+              @select="onFileSelect"
+            />
+            <Button label="Upload Avatar" @click="handleEditStaffAvatarUpload" />
+          </div>
+          <div class="p-field">
+            <label for="edit-staff-name" class="col-1">name</label>
+            <InputText id="edit-staff-name" v-model="editStaff.name" />
+          </div>
+          <div class="p-field">
+            <label for="edit-staff-position" class="col-1">position</label>
+            <InputText id="edit-staff-position" v-model="editStaff.position" />
+          </div>
+          <div class="p-field">
+            <label for="edit-staff-describe" class="col-1">describe</label>
+            <InputText id="edit-staff-describe" class="col-10" v-model="editStaff.describe" />
+          </div>
+          </div>
+          <template #footer>
+            <Button label="cancel" icon="pi pi-times" class="p-button-text" @click="editStaffDialogVisible = false" />
+            <Button label="save" icon="pi pi-check" class="p-button-text" @click="updateStaff" />
+          </template>
+        </Dialog>
+  
+        <!-- 确认删除 Staff Dialog -->
+        <Dialog header="Confirm Delete" :visible.sync="deleteStaffDialogVisible" modal>
+          <p>Are you sure you want to delete <strong>{{ staffToDelete.name }}</strong> user?</p>
+          <template #footer>
+            <Button label="cancel" icon="pi pi-times" class="p-button-text" @click="deleteStaffDialogVisible = false" />
+            <Button label="delete" icon="pi pi-trash" class="p-button-text p-button-danger" @click="deleteStaff" />
           </template>
         </Dialog>
 
@@ -447,8 +812,42 @@ h1 {
   margin-bottom: 30px;
 }
 
+.user-management,
+.staff-management {
+  margin-top: 40px;
+}
+
+.user-management .header,
+.staff-management .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.user-management h2,
+.staff-management h2 {
+  margin: 0;
+}
+
+.avatar-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
 table {
   width: 100%;
+}
+  
+.p-field {
+  margin-bottom: 1rem;
+}
+
+.buttons {
+  button {
+    text-align: center;
+  }
 }
 
 .error {

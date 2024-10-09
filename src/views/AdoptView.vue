@@ -244,6 +244,7 @@ const bookAppointment = async (selectedDate) => {
         <p class="text-center">
           Heartwarming happy tails are coming right up!
         </p>
+        <p class="text-center">Note: Pets cannot be specified, but you can leave your preferences in reason and we will try to assign them to you.</p>
         <form @submit.prevent="submitForm">
           <div class="row mb-3">
             <div>

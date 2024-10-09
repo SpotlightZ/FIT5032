@@ -5,6 +5,7 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 
+
 // https://vitejs.dev/config/
 export default defineConfig({
   // base: '/sub3-yiting/', // 将 '/your-base-path/' 替换为实际部署时的路径

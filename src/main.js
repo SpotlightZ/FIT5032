@@ -25,11 +25,14 @@ import Paginator from 'primevue/paginator'
 import Dialog from 'primevue/dialog';
 import ToastService from 'primevue/toastservice';
 import Toast from 'primevue/toast';
+import Card from 'primevue/card';
 import Chart from 'primevue/chart';
 import Dropdown from 'primevue/dropdown';
+import Avatar from 'primevue/avatar'; // 用于显示头像
+import FileUpload from 'primevue/fileupload'; // 用于显示头像
 
 import { initializeApp } from "firebase/app";
-
+import 'primeicons/primeicons.css'; 
 
 
 // if (window.location.protocol !== 'https:') {
@@ -64,5 +67,8 @@ app.component('Dialog', Dialog);
 app.component('Toast', Toast);
 app.component('Chart', Chart);
 app.component('Dropdown', Dropdown);
+app.component('Avatar', Avatar);
+app.component('FileUpload', FileUpload);
+app.component('Card', Card);
 
 app.mount('#app')

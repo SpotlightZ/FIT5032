@@ -29,8 +29,8 @@ const menuItems = computed(() => {
       {
         label: 'Manage list',
         items: [
-          { label: 'Adopter', command: () => router.push('/adopter')},
-          { label: 'Pets', command: () => router.push('/managePet') },
+          { label: 'Admin Dashboard', command: () => router.push('/dashboard') },
+          { label: 'Adopter & Pets', command: () => router.push('/adopter')},
         ]
       }
     )

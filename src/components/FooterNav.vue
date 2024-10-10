@@ -1,7 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
-import Menubar from 'primevue/menubar';
-import router from '@/router/index'
+import { computed } from 'vue'
 
 
 
@@ -25,8 +23,8 @@ const menuItems = computed(() => {
       {
         label: 'Manage list',
         items: [
-          { label: 'Adopter', path: '/adopter' },
-          { label: 'Pets', path: '/managePet' },
+          { label: 'Admin Dashboard', path: '/dashboard' },
+          { label: 'Adopter & Pets', path: '/adopter' },
         ]
       }
     )

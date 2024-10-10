@@ -1,11 +1,12 @@
 <script>
   import GenAI from '@/components/GenAI.vue'
   import NumList from '@/components/NumList.vue'
-  import { ref, onMounted, nextTick } from 'vue';
+  import HighlightChart from '@/components/HighlightChart.vue'
+  import UserManagement from '@/components/UserManagement.vue'
+  import { ref, onMounted } from 'vue';
   import { db, storage } from '../firebase/init.js'; // 使用命名导入
   import { collection, getDocs, getDoc, query, where, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
   import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-  import Toast from 'primevue/toast';
   import { useToast } from 'primevue/usetoast';
 
   export default {
@@ -13,6 +14,8 @@
     components: {
       GenAI,
       NumList,
+      HighlightChart,
+      UserManagement,
     },
     setup() {
       const usersCount = ref(0);
@@ -21,120 +24,49 @@
       const usersOverview = ref([]);
       const toast = useToast();
 
-      // 用户数据
-      const users = ref([]);
-      // 添加用户 Dialog 状态
-      const addUserDialogVisible = ref(false);
-      const newUser = ref({
-        name: '',
-        email: '',
-        role: null,
-      });
-      const roles = ['admin', 'user', 'guest'];
-
-      // 编辑用户 Dialog 状态
-      const editUserDialogVisible = ref(false);
-      const editUser = ref({
-        id: '',
-        name: '',
-        email: '',
-        role: null,
-      });
-
-      // 删除用户 Dialog 状态
-      const deleteUserDialogVisible = ref(false);
-      const userToDelete = ref({});
-
       // Fetch users from Firestore
-      const fetchUsers = async () => {
-        try {
-          const usersCollection = collection(db, 'users');
-          const usersSnapshot = await getDocs(usersCollection);
-          users.value = usersSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-        } catch (error) {
-          console.error('Error fetching users:', error);
-          toast.add({ severity: 'error', summary: '错误', detail: '获取用户数据失败。', life: 3000 });
-        }
-      };
+      // const fetchUsers = async () => {
+      //   try {
+      //     const usersCollection = collection(db, 'users');
+      //     const usersSnapshot = await getDocs(usersCollection);
+      //     users.value = usersSnapshot.docs.map(doc => ({
+      //       id: doc.id,
+      //       ...doc.data(),
+      //     }));
+      //     console.log(users.value,'=users');
+          
+      //   } catch (error) {
+      //     console.error('Error fetching users:', error);
+      //     toast.add({ severity: 'error', summary: '错误', detail: '获取用户数据失败。', life: 3000 });
+      //   }
+      // };
 
-      // 添加新用户
-      const addUser = async () => {
-        // 表单验证
-        if (!newUser.value.name || !newUser.value.email || !newUser.value.role) {
-          toast.add({ severity: 'warn', summary: '警告', detail: '请填写所有字段。', life: 3000 });
-          return;
-        }
+      // // 添加新用户
+      // const addUser = async () => {
+      //   // 表单验证
+      //   if (!newUser.value.name || !newUser.value.email || !newUser.value.role) {
+      //     toast.add({ severity: 'warn', summary: '警告', detail: '请填写所有字段。', life: 3000 });
+      //     return;
+      //   }
 
-        try {
-          const usersCollection = collection(db, 'users');
-          await addDoc(usersCollection, {
-            name: newUser.value.name,
-            email: newUser.value.email,
-            role: newUser.value.role,
-            createdAt: serverTimestamp(),
-          });
-          toast.add({ severity: 'success', summary: '成功', detail: '用户添加成功。', life: 3000 });
-          addUserDialogVisible.value = false;
-          newUser.value = { name: '', email: '', role: null };
-          fetchUsers();
-        } catch (error) {
-          console.error('Error adding user:', error);
-          toast.add({ severity: 'error', summary: '错误', detail: '添加用户失败。', life: 3000 });
-        }
-      };
+      //   try {
+      //     const usersCollection = collection(db, 'users');
+      //     await addDoc(usersCollection, {
+      //       name: newUser.value.name,
+      //       email: newUser.value.email,
+      //       role: newUser.value.role,
+      //       createdAt: serverTimestamp(),
+      //     });
+      //     toast.add({ severity: 'success', summary: '成功', detail: '用户添加成功。', life: 3000 });
+      //     addUserDialogVisible.value = false;
+      //     newUser.value = { name: '', email: '', role: null };
+      //     fetchUsers();
+      //   } catch (error) {
+      //     console.error('Error adding user:', error);
+      //     toast.add({ severity: 'error', summary: '错误', detail: '添加用户失败。', life: 3000 });
+      //   }
+      // };
 
-      // 显示编辑用户 Dialog 并填充数据
-      const showEditUserDialog = (user) => {
-        editUser.value = { ...user };
-        editUserDialogVisible.value = true;
-      };
-
-      // 更新用户
-      const updateUser = async () => {
-        // 表单验证
-        if (!editUser.value.name || !editUser.value.email || !editUser.value.role) {
-          toast.add({ severity: 'warn', summary: '警告', detail: '请填写所有字段。', life: 3000 });
-          return;
-        }
-
-        try {
-          const userRef = doc(db, 'users', editUser.value.id);
-          await updateDoc(userRef, {
-            name: editUser.value.name,
-            email: editUser.value.email,
-            role: editUser.value.role,
-          });
-          toast.add({ severity: 'success', summary: '成功', detail: '用户更新成功。', life: 3000 });
-          editUserDialogVisible.value = false;
-          fetchUsers();
-        } catch (error) {
-          console.error('Error updating user:', error);
-          toast.add({ severity: 'error', summary: '错误', detail: '更新用户失败。', life: 3000 });
-        }
-      };
-
-      // 确认删除用户
-      const confirmDeleteUser = (user) => {
-        userToDelete.value = user;
-        deleteUserDialogVisible.value = true;
-      };
-
-      // 删除用户
-      const deleteUser = async () => {
-        try {
-          const userRef = doc(db, 'users', userToDelete.value.id);
-          await deleteDoc(userRef);
-          toast.add({ severity: 'success', summary: '成功', detail: '用户删除成功。', life: 3000 });
-          deleteUserDialogVisible.value = false;
-          fetchUsers();
-        } catch (error) {
-          console.error('Error deleting user:', error);
-          toast.add({ severity: 'error', summary: '错误', detail: '删除用户失败。', life: 3000 });
-        }
-      };
 
       // 格式化日期
       const formatDate = (rowData) => {
@@ -291,7 +223,7 @@
           }));
         } catch (error) {
           console.error('Error fetching staffs:', error);
-          toast.add({ severity: 'error', summary: '错误', detail: '获取 Staff 数据失败。', life: 3000 });
+          toast.add({ severity: 'error', summary: 'error', detail: 'Failed to get Staff data.', life: 3000 });
         }
       };
 
@@ -299,7 +231,7 @@
       const addStaff = async () => {
         // 表单验证
         if (!newStaff.value.id || !newStaff.value.avatar || !newStaff.value.name || !newStaff.value.position || !newStaff.value.describe) {
-          toast.add({ severity: 'warn', summary: '警告', detail: '请填写所有字段。', life: 3000 });
+          toast.add({ severity: 'warn', summary: 'warn', detail: 'Please fill in all fields.', life: 3000 });
           return;
         }
 
@@ -313,13 +245,13 @@
             describe: newStaff.value.describe,
             createdAt: serverTimestamp(),
           });
-          toast.add({ severity: 'success', summary: '成功', detail: 'Staff 添加成功。', life: 3000 });
+          toast.add({ severity: 'success', summary: 'success', detail: 'Staff added successfully.', life: 3000 });
           addStaffDialogVisible.value = false;
           newStaff.value = { id: '', avatar: '', name: '', position: '', describe: '' };
           fetchStaffs();
         } catch (error) {
           console.error('Error adding staff:', error);
-          toast.add({ severity: 'error', summary: '错误', detail: '添加 Staff 失败。', life: 3000 });
+          toast.add({ severity: 'error', summary: 'error', detail: 'Failed to add Staff.', life: 3000 });
         }
       };
   
@@ -332,7 +264,7 @@
       // 更新 Staff
       const updateStaff = async () => {
         if (!editStaff.value.id || !editStaff.value.name || !editStaff.value.position || !editStaff.value.describe) {
-          toast.add({ severity: 'warn', summary: '警告', detail: '请填写所有字段。', life: 3000 });
+          toast.add({ severity: 'warn', summary: 'warn', detail: 'Please fill in all fields.', life: 3000 });
           return;
         }
       
@@ -342,7 +274,7 @@
         
           if (!staffDoc.exists()) {
             console.error('Error: Staff document does not exist.');
-            toast.add({ severity: 'error', summary: '错误', detail: '该 Staff 文档不存在。', life: 3000 });
+            toast.add({ severity: 'error', summary: 'error', detail: 'The Staff document does not exist.', life: 3000 });
             return;
           }
         
@@ -353,12 +285,12 @@
             describe: editStaff.value.describe,
           });
         
-          toast.add({ severity: 'success', summary: '成功', detail: 'Staff 更新成功。', life: 3000 });
+          toast.add({ severity: 'success', summary: 'success', detail: 'Staff updated successfully.', life: 3000 });
           editStaffDialogVisible.value = false;
           fetchStaffs();
         } catch (error) {
           console.error('Error updating staff:', error);
-          toast.add({ severity: 'error', summary: '错误', detail: '更新 Staff 失败。', life: 3000 });
+          toast.add({ severity: 'error', summary: 'error', detail: 'Failed to update Staff.', life: 3000 });
         }
       };
 
@@ -374,12 +306,12 @@
         try {
           const staffRef = doc(db, 'staff', staffToDelete.value.id);
           await deleteDoc(staffRef);
-          toast.add({ severity: 'success', summary: '成功', detail: 'Staff 删除成功。', life: 3000 });
+          toast.add({ severity: 'success', summary: 'success', detail: 'Staff deleted successfully.', life: 3000 });
           deleteStaffDialogVisible.value = false;
           fetchStaffs();
         } catch (error) {
           console.error('Error deleting staff:', error);
-          toast.add({ severity: 'error', summary: '错误', detail: '删除 Staff 失败。', life: 3000 });
+          toast.add({ severity: 'error', summary: 'error', detail: 'Failed to delete Staff.', life: 3000 });
         }
       };
 
@@ -404,11 +336,9 @@
 
       // 处理 Staff Avatar 上传
       const handleStaffAvatarUpload = async () => {
-        
-        // const file = fileUploadRef.value.files[0];
         const file = selectedFile.value;
         if (!file) {
-          toast.add({ severity: 'warn', summary: '警告', detail: '请选择一个文件。', life: 3000 });
+          toast.add({ severity: 'warn', summary: 'warn', detail: 'Please select a file.', life: 3000 });
           return;
         }
 
@@ -417,11 +347,13 @@
         try {
           await uploadBytes(storageReference, file);
           const downloadURL = await getDownloadURL(storageReference);
+          console.log(downloadURL,'=downloadURL');
+          
           newStaff.value.avatar = downloadURL;
-          toast.add({ severity: 'success', summary: '成功', detail: '头像上传成功。', life: 3000 });
+          toast.add({ severity: 'success', summary: 'success', detail: 'The avatar is uploaded successfully.', life: 3000 });
         } catch (error) {
           console.error('Error uploading avatar:', error);
-          toast.add({ severity: 'error', summary: '错误', detail: '头像上传失败。', life: 3000 });
+          toast.add({ severity: 'error', summary: 'error', detail: 'Failed to upload the avatar.', life: 3000 });
         }
       };
 
@@ -430,7 +362,7 @@
       const handleEditStaffAvatarUpload = async (event) => {
         const file = selectedFile.value;
         if (!file) {
-          toast.add({ severity: 'warn', summary: '警告', detail: '请选择一个文件。', life: 3000 });
+          toast.add({ severity: 'warn', summary: 'warn', detail: '请选择一个文件。', life: 3000 });
           return;
         }
 
@@ -440,10 +372,10 @@
           await uploadBytes(storageReference, file);
           const downloadURL = await getDownloadURL(storageReference);
           editStaff.value.avatar = downloadURL;
-          toast.add({ severity: 'success', summary: '成功', detail: '头像上传成功。', life: 3000 });
+          toast.add({ severity: 'success', summary: 'success', detail: 'The avatar is uploaded successfully.', life: 3000 });
         } catch (error) {
           console.error('Error uploading avatar:', error);
-          toast.add({ severity: 'error', summary: '错误', detail: '头像上传失败。', life: 3000 });
+          toast.add({ severity: 'error', summary: 'error', detail: 'Failed to upload the avatar.', life: 3000 });
         }
       };
 
@@ -460,12 +392,8 @@
         return '';
       };
 
-      
-
-
   
       onMounted(async () => {
-        await fetchUsers();
         // await fetchCounts();
         await fetchApplications();
         fetchStaffs();
@@ -482,20 +410,6 @@
         usersChartData,
         adoptersChartData,
         chartOptions,
-        users,
-        addUserDialogVisible,
-        newUser,
-        roles,
-        showAddUserDialog: () => addUserDialogVisible.value = true,
-        addUser,
-        editUserDialogVisible,
-        editUser,
-        showEditUserDialog,
-        updateUser,
-        deleteUserDialogVisible,
-        userToDelete,
-        confirmDeleteUser,
-        deleteUser,
         formatDate,
         
         // Staff 管理相关
@@ -531,13 +445,9 @@
   <div class="admin-dashboard">
       <h1>Admin Dashboard</h1>
       <div class="charts">
-        <NumList></NumList>
-        <!-- <Card title="Users Overview">
-          <Chart type="pie" :data="usersChartData" :options="chartOptions" />
-        </Card>
-        <Card title="Adopters Count">
-          <Chart type="bar" :data="adoptersChartData" :options="chartOptions" />
-        </Card> -->
+        <NumList />
+        <HighlightChart />
+       
       </div>
       <div class="data-tables">
         <Card title="Users Overview">
@@ -546,52 +456,9 @@
             <Column field="count" header="Count"></Column>
           </DataTable>
         </Card>
-  
-        <!-- <Card title="Adoption Applications">
-          <DataTable :value="applications" responsiveLayout="scroll">
-            <Column field="userId" header="User ID"></Column>
-            <Column field="petId" header="Pet ID"></Column>
-            <Column field="status" header="Status"></Column>
-            <Column header="Actions">
-              <template #body="slotProps">
-                <Button
-                  label="Approve"
-                  icon="pi pi-check"
-                  class="p-button-success p-mr-2"
-                  @click="approveApplication(slotProps.data.id)"
-                  :disabled="slotProps.data.status !== 'Pending'"
-                />
-                <Button
-                  label="Reject"
-                  icon="pi pi-times"
-                  class="p-button-danger"
-                  @click="rejectApplication(slotProps.data.id)"
-                  :disabled="slotProps.data.status !== 'Pending'"
-                />
-              </template>
-            </Column>
-          </DataTable>
-        </Card> -->
 
-        <div class="user-management">
-          <div class="header">
-            <h2>User Management</h2>
-            <Button label="Add User" icon="pi pi-plus" class="p-button-success" @click="showAddUserDialog" />
-          </div>
-
-          <DataTable :value="users" paginator :rows="10" responsiveLayout="scroll">
-            <Column field="name" header="name"></Column>
-            <Column field="email" header="email"></Column>
-            <Column field="role" header="role"></Column>
-            <Column field="createdAt" header="create time" :body="formatDate"></Column>
-            <Column header="operation" class="buttons">
-              <template #body="slotProps">
-                <Button label="Edit" icon="pi pi-pencil" class="p-button-rounded p-button-info p-mr-2" @click="showEditUserDialog(slotProps.data)" />
-                <Button label="Delete" icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="confirmDeleteUser(slotProps.data)" />
-              </template>
-            </Column>
-          </DataTable>
-        </div>
+        <UserManagement></UserManagement>
+      </div>
 
         <!-- Staff 管理部分 -->
         <div class="staff-management">
@@ -608,7 +475,7 @@
             selectionMode="multiple" 
             v-model:selection="selectedStaffs"
             sortMode="multiple"
-            filterDisplay="row"
+            filterDisplay="menu"
             :filters="staffFilters"
             @filter="onStaffFilter"
           >
@@ -630,59 +497,6 @@
             </Column>
           </DataTable>
         </div>
-
-        <!-- 添加用户 Dialog -->
-        <Dialog header="Add User" :visible.sync="addUserDialogVisible" modal>
-          <div class="p-fluid">
-            <div class="p-field">
-              <label for="name" class="col-1">name</label>
-              <InputText id="name" v-model="newUser.name" />
-            </div>
-            <div class="p-field">
-              <label for="email" class="col-1">email</label>
-              <InputText id="email" v-model="newUser.email" />
-            </div>
-            <div class="p-field">
-              <label for="role" class="col-1">role</label>
-              <Dropdown id="role" v-model="newUser.role" :options="roles" placeholder="select role" />
-            </div>
-          </div>
-          <template #footer>
-            <Button label="cancel" icon="pi pi-times" class="p-button-text" @click="addUserDialogVisible = false" />
-            <Button label="save" icon="pi pi-check" class="p-button-text" @click="addUser" />
-          </template>
-        </Dialog>
-
-        <!-- 编辑用户 Dialog -->
-        <Dialog header="Edit User" :visible.sync="editUserDialogVisible" modal>
-          <div class="p-fluid">
-            <div class="p-field">
-              <label for="edit-name" class="col-1">name</label>
-              <InputText id="edit-name" v-model="editUser.name" />
-            </div>
-            <div class="p-field">
-              <label for="edit-email" class="col-1">email</label>
-              <InputText id="edit-email" v-model="editUser.email" />
-            </div>
-            <div class="p-field">
-              <label for="edit-role" class="col-1">role</label>
-              <Dropdown id="edit-role" v-model="editUser.role" :options="roles.value" placeholder="select role" />
-            </div>
-          </div>
-          <template #footer>
-            <Button label="cancel" icon="pi pi-times" class="p-button-text" @click="editUserDialogVisible = false" />
-            <Button label="save" icon="pi pi-check" class="p-button-text" @click="updateUser" />
-          </template>
-        </Dialog>
-
-        <!-- 确认删除 Dialog -->
-        <Dialog header="Confirm Delete" :visible.sync="deleteUserDialogVisible" modal>
-          <p>Are you sure you want to delete <strong>{{ userToDelete.name }}</strong> user?</p>
-          <template #footer>
-            <Button label="cancel" icon="pi pi-times" class="p-button-text" @click="deleteUserDialogVisible = false" />
-            <Button label="delete" icon="pi pi-trash" class="p-button-text p-button-danger" @click="deleteUser" />
-          </template>
-        </Dialog>
 
         <!-- 添加 Staff Dialog -->
         <Dialog header="添加 Staff" :visible.sync="addStaffDialogVisible" modal class="col-8">
@@ -775,7 +589,6 @@
           </template>
         </Dialog>
 
-      </div>
       <Toast />
     </div>
   <!-- <GenAI></GenAI> -->

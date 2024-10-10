@@ -6,7 +6,6 @@ import { getFunctions, httpsCallable } from 'firebase/functions'
 import axios from 'axios';
 import { onBeforeMount } from 'vue';
 
-// import FullCalendar from '@/components/FullCalendar.vue'
 
 // Initialize Firebase (make sure Firebase is initialized in your project)
 // import { initializeApp } from 'firebase/app'
@@ -176,61 +175,6 @@ const processFormData = async () => {
   }
 }
 
-// Fetch existing appointments from Firebase Functions
-// const fetchAppointments = async () => {
-//   try {
-//     const response = await axios.get(`${functionURL}/getAppointments`)
-//     return response.data.map(appointment => ({
-//       firstname: appointment.firstname,
-//       date: appointment.date
-//     }))
-//   } catch (error) {
-//     console.error('Error fetching appointments:', error)
-//     return []
-//   }
-// }
-
-
-// 硬编码的预约数据
-const fetchAppointments = async () => {
-  const appointments = [
-    {
-      firstname: 'John',
-      lastname: 'Doe',
-      date: '2024-10-10T09:00:00'
-    },
-    {
-      firstname: 'Jane',
-      lastname: 'Smith',
-      date: '2024-10-12T14:00:00'
-    }
-  ]
-  
-  console.log('Fetched appointments:', appointments); // 确保这里返回的是一个数组
-  return appointments;
-}
-
-// Book a new appointment by calling Firebase Functions
-const bookAppointment = async (selectedDate) => {
-  const appointmentData = {
-    ...formData.value,
-    date: selectedDate
-  }
-  try {
-    const response = await axios.post(`${functionURL}/bookAppointment`, appointmentData, {
-      headers: { 'Content-Type': 'application/json' }
-    })
-    alert('Appointment booked successfully!')
-    fetchAppointments() // Refresh appointments after booking
-  } catch (error) {
-    if (error.response && error.response.status === 400) {
-      alert(error.response.data.message) // 显示预约冲突错误信息
-    } else {
-      console.error('Error booking appointment: ', error)
-      alert('Error booking appointment')
-    }
-  }
-}
 </script>
 
 
@@ -349,7 +293,6 @@ const bookAppointment = async (selectedDate) => {
             <button type="button" class="btn btn-secondary me-2" @click="clearForm">Clear</button>           
           </div>
 
-          <FullCalendar :fetchAppointments="fetchAppointments" :bookAppointment="bookAppointment"></FullCalendar>
         </form>
       </div>
     </div>

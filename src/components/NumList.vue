@@ -16,10 +16,10 @@
         <div class="col-md-3 col-sm-6 mb-4">
           <div class="card stat-card">
             <div class="card-body stat-content">
-              <i class="pi pi-user stat-icon" style="background-color: #10b981;"></i>
+              <i class="pi pi-briefcase stat-icon" style="background-color: #f59e0b;"></i>
               <div class="stat-text">
-                <h4>Adopters</h4>
-                <h2>{{ adoptersCount }}</h2>
+                <h4>Staff</h4>
+                <h2>{{ staffsCount }}</h2>
               </div>
             </div>
           </div>
@@ -28,10 +28,10 @@
         <div class="col-md-3 col-sm-6 mb-4">
           <div class="card stat-card">
             <div class="card-body stat-content">
-              <i class="pi pi-briefcase stat-icon" style="background-color: #f59e0b;"></i>
+              <i class="pi pi-user stat-icon" style="background-color: #10b981;"></i>
               <div class="stat-text">
-                <h4>Staff</h4>
-                <h2>{{ staffsCount }}</h2>
+                <h4>Adopters</h4>
+                <h2>{{ adoptersCount }}</h2>
               </div>
             </div>
           </div>

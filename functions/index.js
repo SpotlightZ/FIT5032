@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /**
  * Import function triggers from their respective submodules:
  *
@@ -124,48 +125,6 @@ exports.getUserData = functions.https.onRequest(async (req, res) => {
   }
 });
 
-// 云函数：获取所有预约数据
-exports.getAppointments = functions.https.onRequest(async (_req, res) => {
-  try {
-    const snapshot = await db.collection("appointments").get();
-    const appointments = snapshot.docs.map((doc) => doc.data());
-    res.status(200).send(appointments);
-  } catch (error) {
-    console.error("Error fetching appointments:", error);
-    res.status(500).send("Error fetching appointments");
-  }
-});
-
-// 云函数：预约处理逻辑
-exports.bookAppointment = functions.https.onRequest(async (req, res) => {
-  const {firstname, lastname, email, date} = req.body;
-
-  try {
-    // 检查是否有冲突的预约
-    const existingAppointments = await db.collection("appointments")
-        .where("date", "==", date)
-        .get();
-
-    if (!existingAppointments.empty) {
-      // eslint-disable-next-line max-len
-      return res.status(400).send({message: "This time slot is already booked!"});
-    }
-
-    // 保存新的预约
-    await db.collection("appointments").add({
-      firstname,
-      lastname,
-      email,
-      date,
-    });
-
-    res.status(200).send({message: "Appointment booked successfully!"});
-  } catch (error) {
-    console.error("Error booking appointment:", error);
-    res.status(500).send("Error booking appointment");
-  }
-});
-
 
 exports.generateText = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
@@ -211,6 +170,25 @@ exports.generateText = functions.https.onRequest((req, res) => {
     }
   });
 });
+
+
+exports.getStaff = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    try {
+      const snapshot = await db.collection("staff").get();
+      const staffList = [];
+      snapshot.forEach((doc) => {
+        staffList.push({id: doc.id, ...doc.data()});
+      });
+      res.status(200).json(staffList);
+    } catch (error) {
+      console.error("Error fetching staff:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  });
+});
+
+
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
 

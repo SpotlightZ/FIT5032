@@ -43,8 +43,11 @@ const contactList = ref([
       </ul>
     </div>
     <h3 class="fs-4 mt-4">We’d love to hear from you!</h3>
+
+    <div class="col-12">
+      <Mapbox />
+    </div>
   </div>
-  <Mapbox />
 </template>
 
 <style scoped>

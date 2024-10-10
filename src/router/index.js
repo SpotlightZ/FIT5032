@@ -5,7 +5,7 @@ import AboutView from '../views/AboutView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import StaffView from '../views/StaffView.vue'
 import ContactView from '../views/ContactView.vue'
-import ManagePet from '../views/ManagePet.vue'
+import AdminDashboard from '../views/AdminDashboard.vue'
 import AdopterView from '../views/AdopterView.vue'
 import FindView from '../views/FindView.vue'
 import AdoptView from '../views/AdoptView.vue'
@@ -49,9 +49,9 @@ const routes = [
         component: ContactView
       },
       {
-        path: 'managePet',
-        name: 'ManagePet',
-        component: ManagePet
+        path: 'dashboard',
+        name: 'AdminDashboard',
+        component: AdminDashboard
       },
       {
         path: 'adopter',

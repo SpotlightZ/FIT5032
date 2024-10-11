@@ -1,72 +1,33 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import Card from 'primevue/card';
+import { useToast } from 'primevue/usetoast';
+import axios from 'axios';
 
-const petList = ref([
-  {
-    image: '/src/assets/images/pet2.jpg',
-    name: 'Hollis',
-    age: 7,
-    shelter: 'Animal Rescue, Inc.',
-    description: "Hollis, a 7-year-old Beagle, was surrendered to Animal Rescue, Inc. when his owner's health began to fail.Hollis had clearly been well cared for in his previous home."
-  },
-  {
-    image: '/src/assets/images/pet3.jpg',
-    name: 'Emely',
-    age: 11,
-    shelter: 'Mercy Crusade',
-    description: "Emely, an 11-year-old Chipoo, was brought to Mercy Crusade in Oxnard, CA when she developed a concerning mammary mass that needed to be examined by a veterinarian. "
-  },
-  {
-    image: '/src/assets/images/pet4.jpg',
-    name: 'Summer',
-    age: 8,
-    shelter: 'KARES',
-    description: "Summer, an 8-year old hound mix, was seen wandering in Kaloko on the west side of the Big Island of Hawaii. Worried forher well-being, several neighbors tried to come together and capture her."
-  },
-  {
-    image: '/src/assets/images/pet1.jpg',
-    name: 'Sophie',
-    age: 9,
-    shelter: 'Friends of Monash Animals',
-    description: 'When Sophie, a 9-year-old lab mix, arrived at Friends of Monash Animals (FOMA) it was discovered that she had degenerative joint disease in her hips and a benign tumor at her elbow.',
-  },
-  {
-    image: '/src/assets/images/pet5.jpg',
-    name: 'Sherman',
-    age: 8,
-    shelter: 'Brother Wolf Animal Rescue',
-    description: 'Sweet senior hound Sherman arrived at Brother Wolf Animal Rescue in Asheville, NC with an unknown history and various health issues. It was obvious to staff that Sherman had suffered severe neglect.',
-  },
-  {
-    image: '/src/assets/images/pet6.jpg',
-    name: 'Hazel',
-    age: 13,
-    shelter: 'CASPCA',
-    description: 'When 13-year-old Hazel was surrendered to the shelter in June, she was severely overweight and struggling with multiple health issues.',
-  },
-  {
-    image: '/src/assets/images/pet7.jpg',
-    name: 'Roxie',
-    age: 7,
-    shelter: 'Petey and Furends',
-    description: 'Senior girl Roxie was a stray who found herself in an overcrowded shelter in North Carolina. Petey and Furends stepped in to transport her to Washington D.C. in hopes.',
-  },
-  {
-    image: '/src/assets/images/pet8.jpg',
-    name: 'Carly',
-    age: 14,
-    shelter: 'Animal Fix Clinic',
-    description: "Carly's owners recently noticed that she wasn't her usual happy self. She was lethargic and not interested in eating. Concerned, they took 14-year-old Carly to their local ER.",
-  },
-  {
-    image: '/src/assets/images/pet9.jpg',
-    name: 'Buddy',
-    age: 11,
-    shelter: 'Humane Society of North Texas',
-    description: 'Buddy came to the Humane Society of North Texas as an abandoned stray who was severely malnourished. A medical exam revealed that this special senior was also suffering from advanced cancer.',
+
+const petList = ref([])
+const toast = useToast();
+const functionURL = import.meta.env.VITE_FUNCTION_URL;
+
+// 调用 Firebase Function 获取宠物数据
+const fetchPets = async () => {
+  try {
+    const response = await axios.get(`${functionURL}/getPets`);
+    petList.value = response.data.pets.map(pet => ({
+      ...pet,
+      createdAt: pet.createdAt, // 已经转换为 Date 对象
+    }));
+    console.log('Fetched Pets:', petList);
+  } catch (error) {
+    console.error('Error fetching pets:', error.response ? error.response.data : error.message);
+    // 可选：显示错误消息
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch pets.', life: 3000 });
   }
-])
+};
+
+onMounted(async () => {
+  fetchPets();
+});
 </script>
 
 <template>
@@ -82,7 +43,7 @@ const petList = ref([
   <div class="pet-grid container">
     <Card v-for="item,idx in petList" :key="idx">
       <template #header>
-        <img :src="item.image" alt="Pet Image" class="pet-image" />
+        <img :src="item.avatar" alt="Pet Image" class="pet-image" />
       </template>
       <template #content>
         <div>

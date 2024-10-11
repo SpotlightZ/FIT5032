@@ -13,11 +13,11 @@
         <div class="role-chart highlight-chart mb-2" style="padding: 40px 40px 0 40px">
           <!-- <h3>Staff</h3> -->
           <div class="row">
-            <div class="col-5">
+            <div class="col-3">
               <h4>Total Staff Number</h4>
               <h2>{{ staffCount }}</h2>
             </div>
-            <div class="col-7 d-flex align-items-center justify-content-right">
+            <div class="col-9 d-flex align-items-center justify-content-right">
               <Chart type="line" :data="staffChartData" :options="chartOptions" class="responsive-chart" style="height: 200px;" />
             </div>
           </div>
@@ -90,7 +90,7 @@ export default {
           // Query for adopters added on this day
           const adoptersSnapshot = await getDocs(
             query(
-              collection(db, 'adopters'),
+              collection(db, 'formSubmissions'),
               where('createdAt', '>=', startOfDay),
               where('createdAt', '<=', endOfDay)
             )

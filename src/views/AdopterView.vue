@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h1>Admin Dashboard</h1>
+    <h1 class="mb-5">Adopters & Pets</h1>
 
     <!-- Adopters Management Table -->
     <h2>Adopters Management</h2>
@@ -11,52 +11,7 @@
         :rows="10" 
         :filters="adopterFilters" 
         dataKey="id"
-        :globalFilterFields="['name', 'email']" 
-        :filterDisplay="'row'"
-        :sortField="sortField" 
-        :sortOrder="sortOrder"
-        selection-mode="multiple"
-        v-model:selection="selectedAdopters"
-      >
-        <template #header>
-          <div class="flex justify-end">
-            <IconField>
-              <InputIcon>
-                <i class="pi pi-search" />
-              </InputIcon>
-              <InputText v-model="adopterFilters['global'].value" placeholder="Keyword Search" />
-            </IconField>
-          </div>
-        </template>
-        <template #empty> No adopter found. </template>
-        <Column selectionMode="multiple" headerStyle="width: 3em"></Column>
-        <Column field="name" header="Adopter Name" sortable filter filterPlaceholder="Search by name">
-          <template #filter>
-            <InputText v-model="adopterFilters['name'].value" placeholder="Search by name" />
-          </template>
-        </Column>
-        <Column field="email" header="Adopter Email" sortable filter filterPlaceholder="Search by email">
-          <template #filter>
-            <InputText v-model="adopterFilters['email'].value" placeholder="Search by email" />
-          </template>
-        </Column>
-        <Column header="Actions">
-          <template #body="slotProps">
-            <Button label="Send Email" icon="pi pi-envelope" @click="openEmailSender(slotProps.data)" />
-          </template>
-        </Column>
-      </DataTable>
-    </div>
-
-    <!-- Donors Management Table -->
-    <h2>Donors Management</h2>
-    <div class="datatable-filter">
-      <DataTable 
-        :value="donors" 
-        paginator 
-        :rows="10" 
-        :filters="donorFilters" 
-        :globalFilterFields="['name', 'email', 'amount']" 
+        :globalFilterFields="['firstname', 'lastname', 'email']" 
         :filterDisplay="'menu'"
         :sortField="sortField" 
         :sortOrder="sortOrder"
@@ -64,40 +19,91 @@
         v-model:selection="selectedAdopters"
       >
         <template #header>
-          <div class="flex justify-end">
-            <IconField>
-              <InputIcon>
-                <i class="pi pi-search" />
-              </InputIcon>
-              <InputText v-model="donorFilters['global'].value" placeholder="Keyword Search" />
-            </IconField>
+          <div class="flex justify-between">
+            <div class="flex">
+              <span class="p-input-icon-left">
+                <InputText
+                  v-model="adopterFilters['global'].value"
+                  placeholder="Keyword Search"
+                  class="w-full"
+                />
+              </span>
+            </div>
           </div>
         </template>
-        <template #empty> No donor found. </template>
+        <template #empty> No adopter found. </template>
         <Column selectionMode="multiple" headerStyle="width: 3em"></Column>
-        <Column field="name" header="Donor Name" sortable filter filterPlaceholder="Search by name">
+        <Column field="firstname" header="First Name" sortable filter filterPlaceholder="Search by first name">
           <template #filter>
-            <InputText v-model="donorFilters['name'].value" placeholder="Search by name" />
+            <InputText v-model="adopterFilters['firstname'].value" placeholder="Search by first name" />
           </template>
         </Column>
-        <Column field="email" header="Donor Email" sortable filter filterPlaceholder="Search by email">
+        <Column field="lastname" header="Last Name" sortable filter filterPlaceholder="Search by last name">
           <template #filter>
-            <InputText v-model="donorFilters['email'].value" placeholder="Search by email" />
+            <InputText v-model="adopterFilters['lastname'].value" placeholder="Search by last name" />
           </template>
         </Column>
-        <Column field="amount" header="Donation Amount" sortable filter filterPlaceholder="Search by amount">
+        <Column field="email" header="Email" sortable filter filterPlaceholder="Search by email">
           <template #filter>
-            <InputText v-model="donorFilters['amount'].value" placeholder="Search by amount" />
+            <InputText v-model="adopterFilters['email'].value" placeholder="Search by email" />
           </template>
         </Column>
+        <Column field="gender" header="Gender" sortable filter filterPlaceholder="Search by gender">
+          <template #filter>
+            <InputText v-model="adopterFilters['gender'].value" placeholder="Search by gender" />
+          </template>
+        </Column>
+        <Column field="isAustralian" header="Is Australian" sortable filter filterPlaceholder="Search by Australian status">
+          <template #body="slotProps">
+            <i
+              v-if="slotProps.data.isAustralian"
+              class="pi pi-check"
+              style="color: green; font-size: 1.5em;"
+              aria-label="Yes"
+            ></i>
+            <i
+              v-else
+              class="pi pi-times"
+              style="color: red; font-size: 1.5em;"
+              aria-label="No"
+            ></i>
+          </template>
+          <template #filter>
+            <Dropdown
+              :options="isAustralianOptions"
+              v-model="adopterFilters['isAustralian'].value"
+              placeholder="Select"
+              optionLabel="label"
+              optionValue="value"
+              showClear
+            />
+          </template>
+        </Column>
+        <Column field="reason" header="Reason" sortable filter filterPlaceholder="Search by reason">
+          <template #filter>
+            <InputText v-model="adopterFilters['reason'].value" placeholder="Search by reason" />
+          </template>
+        </Column>
+        <Column field="suburb" header="Suburb" sortable filter filterPlaceholder="Search by suburb">
+          <template #filter>
+            <InputText v-model="adopterFilters['suburb'].value" placeholder="Search by suburb" />
+          </template>
+        </Column>
+        <!-- <Column field="status" header="Status" sortable filter filterPlaceholder="Search by status">
+          <template #filter>
+            <InputText v-model="adopterFilters['status'].value" placeholder="Search by status" />
+          </template>
+        </Column> -->
         <Column header="Actions">
           <template #body="slotProps">
-            <Button label="Send Email" icon="pi pi-envelope" @click="openEmailSender(slotProps.data)" />
+            <Button label="" icon="pi pi-envelope" @click="openEmailSender(slotProps.data)" />
           </template>
         </Column>
       </DataTable>
     </div>
     <Button label="Send Bulk Email" icon="pi pi-send" @click="openBulkEmailSender" :disabled="!selectedAdopters.length" />
+
+
 
     <!-- Email Sender Component -->
     <Dialog header="Send Email" v-model:visible="isDialog" :modal="true" :closable="false" style="width: 80vw">
@@ -108,8 +114,6 @@
       <EmailSender :adopters="selectedAdopters" @close="closeBulkEmailSender" isBulk />
     </Dialog>
 
-
-
      <!-- Export Buttons -->
     <div class="text-center">
       <!-- 其他按钮 -->
@@ -117,6 +121,8 @@
       <button type="button" class="btn btn-success me-2" @click="exportUserData('csv')">Export All to CSV</button>
       <button type="button" class="btn btn-success me-2" @click="exportUserData('pdf')">Export All to PDF</button>
     </div>
+
+    <PetsManagement></PetsManagement>
   </div>
 </template>
   
@@ -127,47 +133,53 @@
   import jsPDF from 'jspdf'
   import autoTable from 'jspdf-autotable'
   import { saveAs } from 'file-saver'
+  import { collection, getDocs } from 'firebase/firestore'
+  import { db } from '@/firebase/init.js'
+  import { getFunctions, httpsCallable } from 'firebase/functions'
+  import axios from 'axios';
+  import PetsManagement from '@/components/PetsManagement.vue';
   
   export default {
     components: {
       EmailSender,
+      PetsManagement,
     },
     data() {
       return {
         // Adopters data
-        adopters: [
-          { id: 1, name: 'Patrick Lulham', email: 'plulham0@sphinn.com' },
-          { id: 2, name: 'Niven Weymont', email: 'nweymont1@columbia.edu' },
-          { id: 3, name: 'Aluino Warratt', email: 'awarratt2@lulu.com' },
-          { id: 4, name: 'Kathy Spandley', email: 'kspandley3@ameblo.jp' },
-          { id: 5, name: 'Maurie Christal', email: 'mchristal4@miitbeian.gov.cn' },
-          { id: 6, name: 'Luce Eastgate', email: 'leastgate5@dropbox.com' },
-          { id: 7, name: 'Brandtr Twydell', email: 'btwydell6@blinklist.com' },
-          { id: 8, name: 'Ddene Allibon', email: 'dallibon7@google.ru' },
-          { id: 9, name: 'Harlan Heffernon', email: 'hheffernon8@opera.com' },
-          { id: 10, name: 'Zelig Cotterrill', email: 'zcotterrill9@sphinn.com' },
-          { id: 11, name: 'Alanna Whacket', email: 'awhacketa@cnet.com' },
-          { id: 12, name: 'Brooke Crinidge', email: 'bcrinidgeb@amazonaws.com' },
-          { id: 13, name: 'Benetta Casol', email: 'bcasolc@icq.com' },
-          { id: 14, name: 'Mellie Male', email: 'mmaled@rakuten.co.jp' },
-          { id: 15, name: 'Sterne Yokelman', email: 'syokelmane@eepurl.com' },
-          { id: 16, name: 'Alleyn Coutts', email: 'acouttsf@cyberchimps.com' },
-          { id: 17, name: 'Dante Quixley', email: 'dquixleyg@prlog.org' },
-          { id: 18, name: 'Tish Burrus', email: 'tburrush@nationalgeographic.com' },
-          { id: 19, name: 'Esma Rosedale', email: 'erosedalei@huffingtonpost.com' },
-          { id: 20, name: 'Celestine Natalie', email: 'cnataliej@aol.com' },
-          { id: 21, name: 'Verile Yedall', email: 'vyedallk@yelp.com' },
-          { id: 22, name: 'Ashlan Dei', email: 'adeil@army.mil' },
-          { id: 23, name: 'Channa Crunkhurn', email: 'ccrunkhurnm@dropbox.com' },
-          { id: 24, name: 'Carrie Duffree', email: 'cduffreen@tumblr.com' },
-          { id: 25, name: 'Tabbie Purdie', email: 'tpurdieo@constantcontact.com' },
-          { id: 26, name: 'Obed Stothart', email: 'ostothartp@dropbox.com' },
-          { id: 27, name: 'Sherry Hollow', email: 'shollowq@pen.io' },
-          { id: 28, name: 'Carolee Tabert', email: 'ctabertr@businessinsider.com' },
-          { id: 29, name: 'Cly Blazhevich', email: 'cblazhevichs@unicef.org' },
-          { id: 30, name: 'Marcille Alvarado', email: 'malvaradot@sakura.ne.jp' },
-          { id: 31, name: 'Roddy Broune', email: 'rbrouneu@blogs.com' }
-        ],
+        // adopters: [
+        //   { id: 1, name: 'Patrick Lulham', email: 'plulham0@sphinn.com' },
+        //   { id: 2, name: 'Niven Weymont', email: 'nweymont1@columbia.edu' },
+        //   { id: 3, name: 'Aluino Warratt', email: 'awarratt2@lulu.com' },
+        //   { id: 4, name: 'Kathy Spandley', email: 'kspandley3@ameblo.jp' },
+        //   { id: 5, name: 'Maurie Christal', email: 'mchristal4@miitbeian.gov.cn' },
+        //   { id: 6, name: 'Luce Eastgate', email: 'leastgate5@dropbox.com' },
+        //   { id: 7, name: 'Brandtr Twydell', email: 'btwydell6@blinklist.com' },
+        //   { id: 8, name: 'Ddene Allibon', email: 'dallibon7@google.ru' },
+        //   { id: 9, name: 'Harlan Heffernon', email: 'hheffernon8@opera.com' },
+        //   { id: 10, name: 'Zelig Cotterrill', email: 'zcotterrill9@sphinn.com' },
+        //   { id: 11, name: 'Alanna Whacket', email: 'awhacketa@cnet.com' },
+        //   { id: 12, name: 'Brooke Crinidge', email: 'bcrinidgeb@amazonaws.com' },
+        //   { id: 13, name: 'Benetta Casol', email: 'bcasolc@icq.com' },
+        //   { id: 14, name: 'Mellie Male', email: 'mmaled@rakuten.co.jp' },
+        //   { id: 15, name: 'Sterne Yokelman', email: 'syokelmane@eepurl.com' },
+        //   { id: 16, name: 'Alleyn Coutts', email: 'acouttsf@cyberchimps.com' },
+        //   { id: 17, name: 'Dante Quixley', email: 'dquixleyg@prlog.org' },
+        //   { id: 18, name: 'Tish Burrus', email: 'tburrush@nationalgeographic.com' },
+        //   { id: 19, name: 'Esma Rosedale', email: 'erosedalei@huffingtonpost.com' },
+        //   { id: 20, name: 'Celestine Natalie', email: 'cnataliej@aol.com' },
+        //   { id: 21, name: 'Verile Yedall', email: 'vyedallk@yelp.com' },
+        //   { id: 22, name: 'Ashlan Dei', email: 'adeil@army.mil' },
+        //   { id: 23, name: 'Channa Crunkhurn', email: 'ccrunkhurnm@dropbox.com' },
+        //   { id: 24, name: 'Carrie Duffree', email: 'cduffreen@tumblr.com' },
+        //   { id: 25, name: 'Tabbie Purdie', email: 'tpurdieo@constantcontact.com' },
+        //   { id: 26, name: 'Obed Stothart', email: 'ostothartp@dropbox.com' },
+        //   { id: 27, name: 'Sherry Hollow', email: 'shollowq@pen.io' },
+        //   { id: 28, name: 'Carolee Tabert', email: 'ctabertr@businessinsider.com' },
+        //   { id: 29, name: 'Cly Blazhevich', email: 'cblazhevichs@unicef.org' },
+        //   { id: 30, name: 'Marcille Alvarado', email: 'malvaradot@sakura.ne.jp' },
+        //   { id: 31, name: 'Roddy Broune', email: 'rbrouneu@blogs.com' }
+        // ],
         // Donors data
         donors: [
           { id: 1, name: 'Forest Cleatherow', email: 'fcleatherow0@comcast.net', amount: 7596 },
@@ -212,13 +224,21 @@
           { id: 40, name: 'Homere Kwietak', email: 'hkwietak13@nymag.com', amount: 5237 },
           { id: 41, name: 'Matty Kinnon', email: 'mkinnon14@archive.org', amount: 8789 }
         ],
+        adopters: [],
         selectedAdopters: [],
         selectedAdopter: [], // Selected adopter for email
         // Filters
         adopterFilters: {
           global: { value: null, matchMode: 'contains' },
-          name: { value: null, matchMode: 'contains' },
+          id: { value: null, matchMode: 'contains' },
+          firstname: { value: null, matchMode: 'contains' },
+          lastname: { value: null, matchMode: 'contains' },
           email: { value: null, matchMode: 'contains' },
+          gender: { value: null, matchMode: 'contains' },
+          isAustralian: { value: null, matchMode: 'equals' },
+          reason: { value: null, matchMode: 'contains' },
+          suburb: { value: null, matchMode: 'contains' },
+          user: { value: null, matchMode: 'contains' }
         },
         donorFilters: {
           global: { value: null, matchMode: 'contains' },
@@ -226,15 +246,24 @@
           email: { value: null, matchMode: 'contains' },
           amount: { value: null, matchMode: 'equals' },
         },
-        sortField: 'name', // Default sorting field
+        sortField: 'firstname', // Default sorting field
         sortOrder: 1, // 1 for ascending order, -1 for descending
         isDialog: false,
         bulkEmailDialogVisible: false,
+        addAdopterDialogVisible: false, // 新增对话框状态
+        isAustralianOptions: [
+          { label: 'Yes', value: true },
+          { label: 'No', value: false },
+        ],
+        functions: null, // Firebase Functions 实例
+        functionURL: import.meta.env.VITE_FUNCTION_URL,
       };
     },
     methods: {
       openEmailSender(adopter) {
         this.selectedAdopter.push(adopter)
+        console.log( this.selectedAdopter,'= this.selectedAdopter');
+        
         this.isDialog = true;
         // this.selectedAdopter = adopter;
       },
@@ -254,13 +283,13 @@
       async exportUserData(format) {
         switch (format) {
               case 'excel':
-                this.exportAsExcel(this.donors);
+                this.exportAsExcel(this.adopters);
                 break;
               case 'csv':
-                this.exportAsCSV(this.donors);
+                this.exportAsCSV(this.adopters);
                 break;
               case 'pdf':
-                this.exportAsPDF(this.donors);
+                this.exportAsPDF(this.adopters);
                 break;
               default:
                 alert('Unsupported export format.');
@@ -298,6 +327,18 @@
         // }
       },
 
+
+      async fetchFormData() {
+        try {
+          // const functionURL = import.meta.env.VITE_FUNCTION_URL;
+          const response = await axios.get(`${this.functionURL}/getFormData`);
+          this.adopters.createdAt = this.adopters.createdAt? response.data.createdAt.toDate() : null;
+          this.adopters = response.data;
+        } catch (error) {
+          console.error('Error fetching data: ', error);
+        }
+      },
+
       // 导出为 Excel
       exportAsExcel(userData) {
         const worksheet = XLSX.utils.json_to_sheet(userData);
@@ -320,43 +361,113 @@
         if (userData && userData.length > 0) {
           const doc = new jsPDF();
           const data = userData.map(item => [
-            // item.firstname,
-            // item.lastname,
+            item.firstname,
+            item.lastname,
             item.id,
-            item.name,
             item.email,
-            item.amount,
-            // item.gender,
-            // item.isAustralian ? 'Yes' : 'No',
-            // item.reason,
-            // item.suburb
+            item.gender,
+            item.isAustralian ? 'Yes' : 'No',
+            item.reason,
+            item.suburb
           ]);
         
           doc.setFontSize(16);
           doc.text('Form Data', 14, 22);
           autoTable(doc, {
             startY: 30,
-            head: [['ID', 'Name', 'Email', 'Amount']],
-            body: data
-            // head: [['First Name', 'Last Name', 'Email', 'Gender', 'Australian Resident', 'Reason', 'Suburb']],
+            body: data,
+            head: [['ID', 'First Name', 'Last Name', 'Email', 'Gender', 'Australian Resident', 'Reason', 'Suburb']],
           });
           doc.save('form_data.pdf');
         } else {
           alert('No data available for PDF export.');
         }
+      },
+
+
+
+
+      // 新增部分
+      // 打开添加收养者对话框
+      openAddAdopterDialog() {
+        this.addAdopterDialogVisible = true;
+      },
+      // 关闭添加收养者对话框
+      closeAddAdopterDialog() {
+        this.addAdopterDialogVisible = false;
+      },
+      // 调用 Firebase Function 添加收养者
+      async addAdopter(newAdopter) {
+        try {
+          const addAdopterFunction = httpsCallable(this.functions, 'addAdopter')
+          const result = await addAdopterFunction(newAdopter)
+          console.log('Adopter added:', result.data)
+          this.addAdopterDialogVisible = false
+          // 刷新数据
+          this.fetchAdopters()
+          // 可选：显示成功消息
+          // this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Adopter added successfully.', life: 3000 })
+        } catch (error) {
+          console.error('Error adding adopter:', error)
+          // 可选：显示错误消息
+          // this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to add adopter.', life: 3000 })
+        }
+      },      
+
+
+      // 从 Firestore 获取收养者数据
+      async fetchAdopters() {
+        try {
+          const adoptersCollection = collection(db, 'formSubmissions')
+          const adoptersSnapshot = await getDocs(adoptersCollection)
+          this.adopters = adoptersSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }))
+          console.log('Fetched Adopters:', this.adopters)
+        } catch (error) {
+          console.error('Error fetching adopters:', error)
+          // 可选：显示错误消息
+          // this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch adopters.', life: 3000 })
+        }
       }
     },
+    mounted() {
+      // 初始化 Firebase Functions
+      this.functions = getFunctions()
+      this.fetchFormData()
+      // 获取收养者数据
+      this.fetchAdopters()
+    }
   };
   </script>
   
   <style scoped>
   .container {
     margin: 20px;
+    max-width: 100vw;
   }
   .global-search {
     margin-bottom: 20px;
   }
   .datatable-filter {
     margin-bottom: 30px;
+  }
+
+  .p-datatable {
+    font-size: 12px; /* 调整为您需要的字号 */
+  }
+
+  .p-datatable thead th {
+    font-size: 12px; /* 表头字号 */
+  }
+
+  .p-datatable tbody td {
+    font-size: 12px; /* 表格内容字号 */
+  }
+
+  /* 可选：调整按钮的字体大小 */
+  .p-button {
+    font-size: 10px;
   }
   </style>

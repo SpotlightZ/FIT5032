@@ -66,7 +66,6 @@
           } else {
             formData.append('to', this.adopters[0].email); // 单个邮件
           }
-        //   formData.append('to', this.adopter.email);
           formData.append('subject', this.emailData.subject);
           formData.append('message', this.emailData.message);
           if (this.emailData.attachment) {
@@ -75,7 +74,6 @@
   
           // 发送邮件请求到后端 API
           const response = await axios.post('http://localhost:3000/api/send-email', formData);
-        //   console.log('Email sent successfully:', response.data);
           alert('Email sent successfully!')
           this.closeSender();
         } catch (error) {

@@ -347,7 +347,6 @@
         try {
           await uploadBytes(storageReference, file);
           const downloadURL = await getDownloadURL(storageReference);
-          console.log(downloadURL,'=downloadURL');
           
           newStaff.value.avatar = downloadURL;
           toast.add({ severity: 'success', summary: 'success', detail: 'The avatar is uploaded successfully.', life: 3000 });
@@ -511,7 +510,7 @@
                 ref="fileUploadRef"
                 mode="basic"
                 name="avatar" 
-                url="#" 
+                url="#"
                 :customUpload="true" 
                 :auto="false"
                 :maxFileSize="1000000"

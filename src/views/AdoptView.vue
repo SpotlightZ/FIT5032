@@ -1,18 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-// Firebase imports
-import { getFirestore, collection, addDoc } from 'firebase/firestore'
-import { getFunctions, httpsCallable } from 'firebase/functions'
 import axios from 'axios';
-import { onBeforeMount } from 'vue';
 
-
-// Initialize Firebase (make sure Firebase is initialized in your project)
-// import { initializeApp } from 'firebase/app'
-// const firebaseConfig = { /* Your Firebase config */ }
-// const app = initializeApp(firebaseConfig)
-const db = getFirestore()
-const functions = getFunctions()
 const formDataList = ref([]);
 
 const functionURL = import.meta.env.VITE_FUNCTION_URL;
@@ -28,11 +17,7 @@ const formData = ref({
   suburb: ''
 })
 
-const calendarEvents = ref([])
-
 formData.value.user = JSON.parse(localStorage.getItem('loggedInUser')).email;
-
-const submittedCards = ref([])
 
 const submitForm = async () => {
   validateFName(true);
@@ -80,21 +65,6 @@ const checkUserExists = async (email) => {
   } catch (error) {
     console.error('Error checking user: ', error);
     return false;
-  }
-};
-
-// 获取用户数据的函数
-const fetchUserData = async (email) => {
-  try {
-    const response = await axios.post(`${functionURL}/getUserData`, { email }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching user data: ', error);
-    return null;
   }
 };
 
@@ -151,30 +121,6 @@ const validateLName = (blur) => {
     errors.value.lastname = null
   }
 }
-
-// **Firebase Functions**
-
-const saveDataToFirebase = async () => {
-  try {
-    await addDoc(collection(db, 'formSubmissions'), formData.value)
-    alert('Data saved to Firebase!')
-  } catch (error) {
-    console.error('Error adding document: ', error)
-  }
-}
-
-// If using a Firebase Function
-const processFormData = async () => {
-  const processData = httpsCallable(functions, 'processFormData')
-  try {
-    const result = await processData(formData.value)
-    console.log(result.data)
-    alert('Data processed via Firebase Function!')
-  } catch (error) {
-    console.error('Error calling function: ', error)
-  }
-}
-
 </script>
 
 
@@ -282,7 +228,7 @@ const processFormData = async () => {
           </div>
           <div class="mb-3">
             <label for="suburb" class="form-label">Suburb</label>
-            <input type="text" class="form-control" id="suburb" v-bind:value="formData.suburb" />
+            <input type="text" class="form-control" id="suburb" v-model="formData.suburb" />
             <div v-if="errors.suburb" class="text-succeeful">
               {{ errors.suburb }}
             </div>

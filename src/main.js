@@ -22,6 +22,7 @@ import Aura from '@primevue/themes/aura'
 import router from './router'
 import InputText from 'primevue/inputtext'
 import Paginator from 'primevue/paginator'
+import Textarea from 'primevue/textarea';
 import Dialog from 'primevue/dialog';
 import ToastService from 'primevue/toastservice';
 import Toast from 'primevue/toast';
@@ -57,11 +58,13 @@ app.use(PrimeVue, { theme: { preset: Aura } })
 app.use(router)
 app.use(pinia)
 app.use(ToastService);
+// app.use(Textarea);
 
 app.component('DataTable', DataTable)
 app.component('Column', Column)
 app.component('Button', Button)
 app.component('InputText', InputText)
+app.component('Textarea', Textarea)
 app.component('Paginator', Paginator);
 app.component('Dialog', Dialog);
 app.component('Toast', Toast);

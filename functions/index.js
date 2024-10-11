@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable max-len */
 /**
  * Import function triggers from their respective submodules:
@@ -18,6 +19,7 @@ const db = admin.firestore();
 
 const GEMINI_API_KEY = functions.config().gemini.key;
 
+
 exports.saveFormData = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     // 处理 OPTIONS 请求
@@ -31,20 +33,46 @@ exports.saveFormData = functions.https.onRequest((req, res) => {
 
     // 检查请求方法是否为 POST
     if (req.method !== "POST") {
+      res.set("Access-Control-Allow-Origin", "*");
       return res.status(405).send("Method Not Allowed");
     }
 
     try {
       const data = req.body;
-      await admin.firestore().collection("formSubmissions").add(data);
+
+      // 验证必填字段（可根据需求调整）
+      const requiredFields = ["email", "firstname", "gender", "lastname", "reason", "user", "suburb"];
+      for (const field of requiredFields) {
+        if (!data[field]) {
+          return res.status(400).send({message: `Missing field: ${field}`});
+        }
+      }
+
+      // 生成新的文档引用，自动生成 id
+      const newDocRef = admin.firestore().collection("formSubmissions").doc();
+      const generatedId = newDocRef.id;
+
+      // 准备新数据，添加 id 和 status 字段
+      const newData = {
+        ...data,
+        id: generatedId,
+        isAustralian: data.isAustralian ? data.isAustralian: false,
+        status: "pending",
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+
+      // 保存新文档到 Firestore
+      await newDocRef.set(newData);
+
       res.set("Access-Control-Allow-Origin", "*");
-      res.status(200).send({message: "Data saved successfully!"});
+      res.status(200).send({message: "Data saved successfully!", id: generatedId});
     } catch (error) {
       console.error("Error saving form data: ", error);
-      res.status(500).send("Error saving form data");
+      res.status(500).send({message: "Error saving form data", error: error.message});
     }
   });
 });
+
 
 exports.getFormData = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
@@ -184,6 +212,135 @@ exports.getStaff = functions.https.onRequest((req, res) => {
     } catch (error) {
       console.error("Error fetching staff:", error);
       res.status(500).send("Internal Server Error");
+    }
+  });
+});
+
+// Pets
+exports.addPet = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    // 处理 OPTIONS 请求
+    if (req.method === "OPTIONS") {
+      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Allow-Methods", "GET, POST");
+      res.set("Access-Control-Allow-Headers", "Content-Type");
+      res.set("Access-Control-Max-Age", "3600");
+      return res.status(204).send("");
+    }
+
+    // 检查请求方法是否为 POST
+    if (req.method !== "POST") {
+      res.set("Access-Control-Allow-Origin", "*");
+      return res.status(405).send("Method Not Allowed");
+    }
+
+    try {
+      const data = req.body;
+
+      // 验证必填字段（根据实际需求调整）
+      const requiredFields = ["name", "age", "address", "description"];
+      for (const field of requiredFields) {
+        if (!data[field]) {
+          return res.status(400).send({message: `Missing field: ${field}`});
+        }
+      }
+
+      // 生成新的文档引用，自动生成 id
+      const newDocRef = admin.firestore().collection("pets").doc();
+      const generatedId = newDocRef.id;
+
+      // 准备新数据，添加 id、status 和 createdAt 字段
+      const newData = {
+        ...data,
+        id: generatedId,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+
+      // 保存新文档到 Firestore
+      await newDocRef.set(newData);
+
+      res.set("Access-Control-Allow-Origin", "*");
+      res.status(200).send({message: "Pet added successfully!", id: generatedId});
+    } catch (error) {
+      console.error("Error adding pet: ", error);
+      res.status(500).send({message: "Error adding pet", error: error.message});
+    }
+  });
+});
+
+exports.getPets = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    // 处理 OPTIONS 请求
+    if (req.method === "OPTIONS") {
+      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Allow-Methods", "GET");
+      res.set("Access-Control-Allow-Headers", "Content-Type");
+      res.set("Access-Control-Max-Age", "3600");
+      return res.status(204).send("");
+    }
+
+    // 检查请求方法是否为 GET
+    if (req.method !== "GET") {
+      res.set("Access-Control-Allow-Origin", "*");
+      return res.status(405).send("Method Not Allowed");
+    }
+
+    try {
+      const petsSnapshot = await admin.firestore().collection("pets").get();
+      const pets = petsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt ? doc.data().createdAt.toDate() : null,
+      }));
+
+      res.set("Access-Control-Allow-Origin", "*");
+      res.status(200).send({pets});
+    } catch (error) {
+      console.error("Error fetching pets: ", error);
+      res.status(500).send({message: "Error fetching pets", error: error.message});
+    }
+  });
+});
+
+// 创建 deletePet Function
+exports.deletePet = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    // 处理 OPTIONS 请求
+    if (req.method === "OPTIONS") {
+      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Allow-Methods", "DELETE, OPTIONS");
+      res.set("Access-Control-Allow-Headers", "Content-Type");
+      res.set("Access-Control-Max-Age", "3600");
+      return res.status(204).send("");
+    }
+
+    // 确保请求方法为 DELETE
+    if (req.method !== "DELETE") {
+      res.set("Access-Control-Allow-Origin", "*");
+      return res.status(405).send("Method Not Allowed");
+    }
+
+    try {
+      const {petId} = req.query;
+
+      if (!petId) {
+        return res.status(400).send({message: "Missing parameter: petId"});
+      }
+
+      const petRef = admin.firestore().collection("pets").doc(petId);
+      const petDoc = await petRef.get();
+
+      if (!petDoc.exists) {
+        return res.status(404).send({message: "Pet not found"});
+      }
+
+      await petRef.delete();
+
+      res.set("Access-Control-Allow-Origin", "*");
+      res.status(200).send({message: "Pet deleted successfully!"});
+    } catch (error) {
+      console.error("Error deleting pet: ", error);
+      res.status(500).send({message: "Error deleting pet", error: error.message});
     }
   });
 });

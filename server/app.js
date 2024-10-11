@@ -37,7 +37,7 @@ app.post('/api/send-email', upload.single('attachment'), async (req, res) => {
   }
 
   const msg = {
-    to: recipient,
+    to,
     from: 'dd.zheng.other@outlook.com', // 发件人邮箱，必须是已验证的 SendGrid 邮箱
     subject,
     text: message,
@@ -49,7 +49,6 @@ app.post('/api/send-email', upload.single('attachment'), async (req, res) => {
     await sgMail.send(msg);
     res.status(200).send({ message: 'Email sent successfully' });
   } catch (error) {
-    console.log(process.env.SENDGRID_API_KEY,'=key');
     console.error('Error sending email:', error);
     res.status(500).send({ error: 'Failed to send email' });
   }

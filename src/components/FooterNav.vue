@@ -36,7 +36,8 @@ const menuItems = computed(() => {
         label: 'Pet List',
         items: [
           { label: 'Find a Pet', path: '/find' },
-          { label: 'Adopt a Pet', path: '/adopt' }
+          { label: 'Adopt a Pet', path: '/adopt' },
+          { label: 'Pet Advisor', path: '/petadvisor' }
         ]
       },
       {

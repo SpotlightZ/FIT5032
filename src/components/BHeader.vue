@@ -42,7 +42,8 @@ const menuItems = computed(() => {
         label: 'Pet List',
         items: [
           { label: 'Find a Pet', command: () => router.push('/find') },
-          { label: 'Adopt a Pet', command: () => router.push('/adopt') }
+          { label: 'Adopt a Pet', command: () => router.push('/adopt') },
+          { label: 'Pet Advisor', command: () => router.push('/petadvisor') }
         ]
       },
       {

@@ -1,6 +1,6 @@
 <template>
     <div class="chat-container">
-      <h1>Gemini AI Chatbot</h1>
+      <h1>Pet Advisor AI Chatbot</h1>
       <div class="chat-window" ref="chatWindow">
         <div
           v-for="(message, index) in messages"
@@ -104,7 +104,7 @@
   
       // Add initial message on component mount
       onMounted(() => {
-        const initialText = 'Hello! Nice to meet you. What would you like to know?';
+        const initialText = `Hello! Nice to meet you. What would you like to know?<p>eg: How to take care of a newly adopted pet？</p><p>How should I prepare my home for a new pet?</p><p>What are some important tips for training a new pet?</p>`;
         messages.value.push({
           role: 'model',
           text: initialText,
@@ -128,7 +128,7 @@
   <style scoped>
   .chat-container {
     max-width: 600px;
-    margin: 0 auto;
+    /* margin: 0 auto; */
     padding: 20px;
     font-family: Arial, sans-serif;
   }
@@ -164,7 +164,7 @@
     max-width: 80%;
     padding: 10px;
     border-radius: 10px;
-    background-color: #e0f7fa;
+    background-color: #F9E8E7FF;
   }
   
   .message.user .message-content {
@@ -172,7 +172,7 @@
   }
   
   .message.model .message-content {
-    background-color: #e0f7fa;
+    background-color: #F9E8E7FF;
   }
   
   .input-form {
@@ -192,7 +192,7 @@
     padding: 10px 20px;
     margin-left: 10px;
     font-size: 16px;
-    background-color: #0288d1;
+    background-color: #02B2D1FF;
     color: white;
     border: none;
     border-radius: 5px;

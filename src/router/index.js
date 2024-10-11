@@ -10,6 +10,7 @@ import AdopterView from '../views/AdopterView.vue'
 import FindView from '../views/FindView.vue'
 import AdoptView from '../views/AdoptView.vue'
 import ArticlesView from '../views/ArticlesView.vue'
+import PetAdvisor from '../views/PetAdvisor.vue'
 import { useUserStore } from "@/store";
 
 const routes = [
@@ -72,6 +73,11 @@ const routes = [
         path: 'articles',
         name: 'Articles',
         component: ArticlesView
+      },
+      {
+        path: 'petadvisor',
+        name: 'PetAdvisor',
+        component: PetAdvisor
       },
     ]
   }

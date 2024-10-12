@@ -57,9 +57,6 @@ const menuItems = computed(() => {
   return items;
 })
 
-
-
-
 function getUserRole() {
   // Determine user whether to log in
   return JSON.parse(localStorage.getItem('loggedInUser')).role;
@@ -70,7 +67,7 @@ let userRole = getUserRole()
 </script>
 
 <template>
-  <Menubar :model="menuItems">
+  <Menubar :model="menuItems" aria-label="Main Navigation">
     <template #end>
       <div class="flex items-center gap-2">
         <div class="logout row justify-content-end text-center">
@@ -82,6 +79,12 @@ let userRole = getUserRole()
 </template>
 
 <style scoped>
+/* Focus Styles */
+button:focus,
+a:focus {
+  outline: 2px solid #005fcc;
+}
+
 .b-example-divider {
   height: 3rem;
   background-color: rgba(0, 0, 0, 0.1);
@@ -130,5 +133,11 @@ let userRole = getUserRole()
     border-radius: 8px;
     color: #fff;
     background: #000;
+}
+
+.logout > button:hover,
+.logout > button:focus {
+  background-color: #333;
+  color: #fff;
 }
 </style>

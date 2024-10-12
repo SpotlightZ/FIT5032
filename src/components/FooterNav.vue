@@ -1,8 +1,6 @@
 <script setup>
 import { computed } from 'vue'
 
-
-
 const menuItems = computed(() => {
   const items = []
   items.push({
@@ -61,7 +59,7 @@ let userRole = getUserRole()
 </script>
 
 <template>
-  <footer class="footer mt-5">
+  <footer class="footer mt-5" aria-label="Footer Navigation">
     <div class="footer-container">
       <div class="footer-column" v-for="item,idx in menuItems" :key="idx">
         <h3>{{ item.label }}</h3>
@@ -76,6 +74,11 @@ let userRole = getUserRole()
 </template>
 
 <style scoped>
+/* Focus Styles */
+a:focus {
+  outline: 2px solid #005fcc;
+}
+
 .footer {
   background-color: #f8f9fa;
   padding: 20px;
@@ -109,11 +112,11 @@ let userRole = getUserRole()
 }
 
 .footer-column ul li a {
-  text-decoration: none;
+  text-decoration: underline;
   color: #333;
 }
 
 .footer-column ul li a:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 </style>

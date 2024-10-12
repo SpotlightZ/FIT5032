@@ -31,7 +31,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="bg row align-items-center">
+  <!-- Skip Navigation Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <div class="bg row align-items-center" role="img" aria-label="Meet the Pets">
     <div>
       <h1 class="text-center fs-1">Meet the Pets</h1>
       <p class="text-center fs-3">Meet some of the senior pets helped by The Monash Organization.</p>
@@ -40,32 +43,84 @@ onMounted(async () => {
   <div class="col-12 mt-5">
     <h2 class="text-center">Find a Pet</h2>
   </div>
-  <div class="pet-grid container">
-    <Card v-for="item,idx in petList" :key="idx">
-      <template #header>
-        <img :src="item.avatar" alt="Pet Image" class="pet-image" />
-      </template>
-      <template #content>
-        <div>
-          <div class="pet-header">
-            <h2>{{ item.name }}</h2>
-            <span class="age-badge">{{item.age }} YRS</span>
+
+
+  <!-- Main Content Area -->
+  <main id="main-content">
+    <div class="pet-grid container">
+      <Card v-for="item,idx in petList" :key="idx">
+        <template #header>
+          <img :src="item.avatar" alt="Pet Image" class="pet-image" />
+        </template>
+        <template #content>
+          <div>
+            <div class="pet-header">
+              <h2>{{ item.name }}</h2>
+              <span class="age-badge">{{item.age }} YRS</span>
+            </div>
+            <p class="shelter-name">{{ item.shelter }}</p>
+            <p class="description">{{ item.description }}</p>
+            <!-- <a href="#" class="more-info">A Closer Look <i class="pi pi-chevron-right"></i></a> -->
           </div>
-          <p class="shelter-name">{{ item.shelter }}</p>
-          <p class="description">{{ item.description }}</p>
-          <!-- <a href="#" class="more-info">A Closer Look <i class="pi pi-chevron-right"></i></a> -->
-        </div>
-      </template>
-    </Card>
-  </div>
+        </template>
+      </Card>
+    </div>
+  </main>
   
 </template>
 
 <style scoped>
+/* 跳过链接的样式 */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: static;
+  left: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+  background: #fff;
+  color: #000;
+  padding: 10px;
+  z-index: 1000;
+}
+
+/* 背景图像样式 */
 .bg {
   background: url('../assets/images/bg-find.png') no-repeat;
   background-position: center;
   background-size: cover;
+}
+
+/* 焦点样式 */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #005fcc;
+}
+
+/* 确保足够的色彩对比度 */
+.text-center {
+  color: #000;
+}
+
+/* 隐藏但对屏幕阅读器可见的文本 */
+.visually-hidden {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
 }
 .pet-grid {
   display: grid;

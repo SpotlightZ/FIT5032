@@ -45,4 +45,35 @@
 .text-succeeful {
   color: green;
 }
+
+/* Focus Styles */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+a:focus {
+  outline: 2px solid #005fcc;
+}
+
+/* Skip Link Styles */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: static;
+  left: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+  background: #fff;
+  color: #000;
+  padding: 10px;
+  z-index: 1000;
+}
 </style>

@@ -1,7 +1,5 @@
 <script setup>
 import { ref } from 'vue'
-import { useUserStore } from '@/store';
-// import router from '../router/index'
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { useRouter } from "vue-router"
@@ -9,12 +7,9 @@ import { useRouter } from "vue-router"
 const db = getFirestore()
 
 const router = useRouter()
-const auth = getAuth()
 
 const email = ref('');
 const password = ref('');
-const userStore = useUserStore();
-
 
 const errors = ref({
   email: null,
@@ -28,6 +23,7 @@ const validateName = (blur) => {
     errors.value.email = null
   }
 }
+
 const validatePassword = (blur) => {
   if (password.value == "") {
     if (blur) errors.value.password = 'Please enter your password'
@@ -40,7 +36,6 @@ const toRegister = () => {
   router.replace("/register");
 }
 
-
 const signin = async () => {
   try {
     const userCredential = await signInWithEmailAndPassword(getAuth(), email.value, password.value);
@@ -50,7 +45,7 @@ const signin = async () => {
     const userDoc = await getDoc(userDocRef);
     if (userDoc.exists()) {
       const userData = userDoc.data();
-      const role = userData.role;  // 获取 role 字段
+      const role = userData.role;
 
       localStorage.setItem('loggedInUser', JSON.stringify(userData));
 
@@ -64,79 +59,102 @@ const signin = async () => {
     } else {
       console.log("Error");
     }
-  }catch (error) {
-      console.log(error);
+  } catch (error) {
+    console.log(error);
   }
 }
 
 const doLogin = () => {
-  try {
-    if (email.value == "") {
-        errors.value.email = "Please enter your email";
-      return;
-    }
-    if (password.value == "") {
-      errors.value.password = "Please enter your password";
-      return;
-    }
-
-    signin();
-    // userStore.login(email.value, password.value);
-
-    // const role = JSON.parse(localStorage.getItem('loggedInUser')).role
-    // 
+  if (email.value == "") {
+    errors.value.email = "Please enter your email";
+    return;
+  }
+  if (password.value == "") {
+    errors.value.password = "Please enter your password";
+    return;
   }
 
-  finally {
-      // loginLoading.value = false;
-  }
+  signin();
 }
-
 </script>
 
+
 <template>
-<div class="login">
-  <h1 class="fs-1">FIT5032 Assessment Web App</h1>
-  <div class="col-lg-3 col-md-4 col-sm-8 login-box">
-    <h4 class="text-center fs-3">Welcome to Login</h4>
-      <div class="row mb-3">
-        <div>
-          <label for="email" class="form-label fs-6">email</label>
-          <input
-            type="text"
-            class="form-control fs-8"
-            placeholder="email"
-            id="email"
-            @blur="() => validateName(true)"
-            @input="() => validateName(false)"
-            v-model="email"
-            />
-          <div v-if="errors.email" class="text-danger">{{ errors.email }}</div>
-        </div>
+  <!-- Skip Navigation Link -->
+  <div class="login">
+    <h1 class="fs-1">FIT5032 Assessment Web App</h1>
 
-        <div>
-          <label for="password" class="form-label fs-8">Password</label>
-          <input
-            type="password"
-            class="form-control fs-8"
-            placeholder="password"
-              @blur="() => validatePassword(true)"
-              @input="() => validatePassword(false)"
-            v-model="password"
-            />  
-          <div v-if="errors.password" class="text-danger fs-8">{{ errors.password }}</div>
+    <!-- Main Content Area -->
+    <main id="main-content">
+      <div class="col-lg-3 col-md-4 col-sm-8 login-box">
+        <h2 class="text-center fs-3">Welcome to Login</h2>
+        <form @submit.prevent="doLogin" aria-labelledby="login-heading">
+          <h3 id="login-heading" class="visually-hidden">Login Form</h3>
+          <div class="row mb-3">
+            <div>
+              <label for="email" class="form-label fs-6">Email<span aria-hidden="true">*</span></label>
+              <input
+                type="email"
+                class="form-control fs-8"
+                placeholder="Email"
+                id="email"
+                @blur="() => validateName(true)"
+                @input="() => validateName(false)"
+                v-model="email"
+                aria-required="true"
+                :aria-invalid="!!errors.email"
+                :aria-describedby="errors.email ? 'email-error' : null"
+              />
+              <div v-if="errors.email" class="text-danger" id="email-error" role="alert">{{ errors.email }}</div>
+            </div>
+
+            <div>
+              <label for="password" class="form-label fs-8">Password<span aria-hidden="true">*</span></label>
+              <input
+                type="password"
+                class="form-control fs-8"
+                placeholder="Password"
+                id="password"
+                @blur="() => validatePassword(true)"
+                @input="() => validatePassword(false)"
+                v-model="password"
+                aria-required="true"
+                :aria-invalid="!!errors.password"
+                :aria-describedby="errors.password ? 'password-error' : null"
+              />  
+              <div v-if="errors.password" class="text-danger fs-8" id="password-error" role="alert">{{ errors.password }}</div>
+            </div>
+          </div>
+          <button class="fs-8" type="submit">Login</button>
+        </form>
+
+        <div class="mt-4 fs-8">
+          <p>Don't have an account?</p>
+          <button class="join mt-2 fs-8" type="button" @click="toRegister">Join today</button>
         </div>
       </div>
-      <button @click="doLogin" class="fs-8" type="submit" >Login</button>
-
-      <div class="mt-4 fs-8">Don't have an account?
-        <button class="join mt-2 fs-8" type="button"  @click="toRegister">Join today</button>
-      </div>
+    </main>
   </div>
-</div>
 </template>
-  
+
 <style scoped>
+/* Visually Hidden Class */
+.visually-hidden {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Focus Styles */
+button:focus,
+input:focus {
+  outline: 2px solid #005fcc;
+}
+
+/* Additional Styles */
 .login {
   position: relative;
   height: 100vh;
@@ -144,6 +162,7 @@ const doLogin = () => {
   background: url('../assets/images/login.png') no-repeat;
   background-size: 100% 100%;
 }
+
 .login-box {
   position: absolute;
   top: 50%;

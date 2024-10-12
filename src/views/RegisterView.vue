@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue'
-import { useUserStore } from '@/store';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { useRouter } from "vue-router";
@@ -19,54 +18,6 @@ const formData = ref({
   role: '',
 })
 
-const submittedCards = ref([])
-
-const submitForm = () => {
-  validateEmail(true)
-  validatePassword(true)
-  if (!errors.value.email && !errors.value.password) {
-    register()
-  }
-}
-
-
-const register = () => {
-  createUserWithEmailAndPassword(auth, formData.value.email, formData.value.password)
-  .then((userCredential) => {
-    
-    const user = userCredential.user;
-    // console.log("Firebase Register Successful")
-
-    // 将用户的其他信息存储到 Firestore 的 'users' 集合中
-    setDoc(doc(db, "users", user.uid), {
-      
-        email: formData.value.email,
-        role: formData.value.role,  // 添加 role
-        isAustralian: formData.value.isAustralian,  // 其他字段
-        reason: formData.value.reason,
-        createdAt: new Date()  // 添加时间戳
-      }).then(() => {
-        console.log("User data successfully written to Firestore");
-        router.push("/login"); // 跳转到登录页面
-        clearForm()
-      }).catch((error) => {
-        console.error("Error writing document: ", error);
-      });
-  }).catch((error) => {
-    console.log("Error writing document: ", error);
-  })
-}
-
-const clearForm = () => {
-  formData.value = {
-    email: '',
-    password: '',
-    isAustralian: false,
-    reason: '',
-    role: '',
-  }
-}
-
 const errors = ref({
   email: null,
   password: null,
@@ -83,7 +34,7 @@ const validateEmail = (blur) => {
   const emailVerify = emailPattern.test(email)
 
   if (email.length < minLength) {
-    if (blur) errors.value.email = `Password must be at least ${minLength} characters long.`
+    if (blur) errors.value.email = `Email must be at least ${minLength} characters long.`
   } else if (!emailVerify) {
     if (blur) errors.value.email = 'The entered email format is incorrect.'
   } else {
@@ -114,11 +65,7 @@ const validatePassword = (blur) => {
   }
 }
 
-/**
- * Confirm password validation function that checks if the password and confirm password fields match.
- * @param blur: boolean - If true, the function will display an error message if the passwords do not match.
- */
- const validateConfirmPassword = (blur) => {
+const validateConfirmPassword = (blur) => {
   if (formData.value.password !== formData.value.confirmPassword) {
     if (blur) errors.value.confirmPassword = 'Passwords do not match.'
   } else {
@@ -126,44 +73,115 @@ const validatePassword = (blur) => {
   }
 }
 
-const validateText = (blur) => {
-  if (formData.value.reason.includes('friend')) {
-    if (blur) errors.value.reason = 'Great to have a friend';
+const validateReason = (blur) => {
+  if (!formData.value.reason || formData.value.reason.length < 10) {
+    if (blur) errors.value.reason = 'Reason must be at least 10 characters.'
+  } else {
+    errors.value.reason = null
   }
 }
+
+const validateRole = (blur) => {
+  if (!formData.value.role) {
+    if (blur) errors.value.role = 'Please select a role.'
+  } else {
+    errors.value.role = null
+  }
+}
+
+const submitForm = () => {
+  validateEmail(true)
+  validatePassword(true)
+  validateConfirmPassword(true)
+  validateRole(true)
+  validateReason(true)
+  if (!errors.value.email && !errors.value.password && !errors.value.confirmPassword && !errors.value.role && !errors.value.reason) {
+    register()
+  }
+}
+
+const register = () => {
+  createUserWithEmailAndPassword(auth, formData.value.email, formData.value.password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      // 将用户的其他信息存储到 Firestore 的 'users' 集合中
+      setDoc(doc(db, "users", user.uid), {
+        email: formData.value.email,
+        role: formData.value.role,
+        isAustralian: formData.value.isAustralian,
+        reason: formData.value.reason,
+        createdAt: new Date()
+      }).then(() => {
+        console.log("User data successfully written to Firestore");
+        router.push("/login"); // 跳转到登录页面
+        clearForm()
+      }).catch((error) => {
+        console.error("Error writing document: ", error);
+      });
+    }).catch((error) => {
+      console.log("Error creating user: ", error);
+    })
+}
+
+const clearForm = () => {
+  formData.value = {
+    email: '',
+    password: '',
+    confirmPassword: '',
+    isAustralian: false,
+    reason: '',
+    role: '',
+  }
+}
+
 </script>
 
 <template>
-  <div class="container pb-5">
+  <!-- 带有可访问名称的背景容器 -->
+  <div class="container pb-5" role="img" aria-label="Register page background image">
     <div class="row">
       <div class="col-md-8 offset-md-2 main">
         <h1 class="text-center">Sign up for a FIT5032 Assessment 2</h1>
-        <form @submit.prevent="submitForm">
+        <form @submit.prevent="submitForm" aria-labelledby="signup-form-heading">
+          <h2 id="signup-form-heading" class="visually-hidden">Registration Form</h2>
           <div class="row mb-3 mt-5">
             <div class="col-md-6 col-sm-6">
-              <label for="email" class="form-label">email</label>
+              <label for="email" class="form-label">Email<span aria-hidden="true">*</span></label>
               <input
-                type="text"
+                type="email"
                 class="form-control"
                 id="email"
                 @blur="() => validateEmail(true)"
                 @input="() => validateEmail(false)"
                 v-model="formData.email"
+                aria-required="true"
+                :aria-invalid="!!errors.email"
+                :aria-describedby="errors.email ? 'email-error' : null"
               />
-              <div v-if="errors.email" class="text-danger">{{ errors.email }}</div>
+              <div v-if="errors.email" class="text-danger" id="email-error" role="alert">{{ errors.email }}</div>
             </div>
 
             <div class="col-md-6 col-sm-6">
-              <label for="role" class="form-label">Role</label>
-              <select class="form-select" id="role" v-model="formData.role" required>
-                <!-- <option value="admin">Admin</option> -->
+              <label for="role" class="form-label">Role<span aria-hidden="true">*</span></label>
+              <select
+                class="form-select"
+                id="role"
+                v-model="formData.role"
+                aria-required="true"
+                :aria-invalid="!!errors.role"
+                :aria-describedby="errors.role ? 'role-error' : null"
+                @blur="() => validateRole(true)"
+                @change="() => validateRole(false)"
+              >
+                <option value="" disabled>Select role</option>
                 <option value="user">User</option>
                 <option value="guest">Guest</option>
               </select>
+              <div v-if="errors.role" class="text-danger" id="role-error" role="alert">{{ errors.role }}</div>
             </div>
 
             <div>
-              <label for="password" class="form-label">Password</label>
+              <label for="password" class="form-label">Password<span aria-hidden="true">*</span></label>
               <input
                 type="password"
                 class="form-control"
@@ -171,23 +189,32 @@ const validateText = (blur) => {
                 @blur="() => validatePassword(true)"
                 @input="() => validatePassword(false)"
                 v-model="formData.password"
+                aria-required="true"
+                :aria-invalid="!!errors.password"
+                :aria-describedby="errors.password ? 'password-error' : null"
               />
-              <div v-if="errors.password" class="text-danger">{{ errors.password }}</div>
+              <div v-if="errors.password" class="text-danger" id="password-error" role="alert">{{ errors.password }}</div>
             </div>
+
             <div>
-              <label for="confirm-password" class="form-label">Confirm password</label>
+              <label for="confirm-password" class="form-label">Confirm Password<span aria-hidden="true">*</span></label>
               <input
                 type="password"
                 class="form-control"
                 id="confirm-password"
                 v-model="formData.confirmPassword"
                 @blur="() => validateConfirmPassword(true)"
+                @input="() => validateConfirmPassword(false)"
+                aria-required="true"
+                :aria-invalid="!!errors.confirmPassword"
+                :aria-describedby="errors.confirmPassword ? 'confirm-password-error' : null"
               />
-              <div v-if="errors.confirmPassword" class="text-danger">
+              <div v-if="errors.confirmPassword" class="text-danger" id="confirm-password-error" role="alert">
                 {{ errors.confirmPassword }}
               </div>
             </div>
           </div>
+
           <div class="row mb-3">
             <div class="col-md-6 col-sm-6">
               <div class="form-check">
@@ -201,19 +228,25 @@ const validateText = (blur) => {
               </div>
             </div>
           </div>
+
           <div class="mb-3">
-            <label for="reason" class="form-label">Reason for joining</label>
+            <label for="reason" class="form-label">Reason for joining<span aria-hidden="true">*</span></label>
             <textarea
               class="form-control"
               id="reason"
               rows="3"
               v-model="formData.reason"
-              @blur="() => validateText(true)"
+              @blur="() => validateReason(true)"
+              @input="() => validateReason(false)"
+              aria-required="true"
+              :aria-invalid="!!errors.reason"
+              :aria-describedby="errors.reason ? 'reason-error' : null"
             ></textarea>
-            <div v-if="errors.reason" class="text-succeeful">
+            <div v-if="errors.reason" class="text-danger" id="reason-error" role="alert">
               {{ errors.reason }}
             </div>
           </div>
+
           <div class="text-center">
             <button type="submit" class="btn btn-primary me-2">Submit</button>
             <button type="button" class="btn btn-secondary" @click="clearForm">Clear</button>
@@ -222,52 +255,39 @@ const validateText = (blur) => {
       </div>
     </div>
   </div>
-
-  <!-- <div class="row mt-5">
-    <h4>This is a Primevue Datatable.</h4>
-    <DataTable :value="submittedCards" tableStyle="min-width: 50rem">
-      <Column field="email" header="email"></Column>
-      <Column field="password" header="Password"></Column>
-      <Column field="isAustralian" header="Australian Resident"></Column>
-      <Column field="role" header="role"></Column>
-      <Column field="reason" header="Reason"></Column>
-    </DataTable>
-  </div>
-
-  <div class="row mt-5" v-if="submittedCards.length">
-    <div class="d-flex flex-wrap justify-content-start">
-      <div
-        v-for="(card, index) in submittedCards"
-        :key="index"
-        class="card m-2"
-        style="width: 18rem"
-      >
-        <div class="card-header">User Information</div>
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item">email: {{ card.email }}</li>
-          <li class="list-group-item">Password: {{ card.password }}</li>
-          <li class="list-group-item">
-            Australian Resident: {{ card.isAustralian ? 'Yes' : 'No' }}
-          </li>
-          <li class="list-group-item">role: {{ card.role }}</li>
-          <li class="list-group-item">Reason: {{ card.reason }}</li>
-        </ul>
-      </div>
-    </div>
-  </div> -->
 </template>
 
 <style scoped>
+/* 隐藏但对屏幕阅读器可见的文本 */
+.visually-hidden {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* 焦点样式 */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #005fcc;
+}
+
+/* 其他样式 */
 .container {
   background: url('../assets/images/bg-register.png') no-repeat;
   background-size: 100%;
   padding-top: 320px;
+}
 
-  .main {
-    padding: 40px;
-    background: #fff;
-    border-radius: 32px;
-    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
-  }
+.main {
+  padding: 40px;
+  background: #fff;
+  border-radius: 32px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
 }
 </style>
+

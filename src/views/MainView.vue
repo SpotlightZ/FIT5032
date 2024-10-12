@@ -22,7 +22,4 @@ import FooterNav from '@/components/FooterNav.vue'
   z-index: 1000;
   width: 100%;
 }
-.main {
-  margin-top: 52px;
-}
 </style>

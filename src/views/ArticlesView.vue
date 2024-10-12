@@ -14,34 +14,41 @@ const items = ref([
 </script>
 
 <template>
+  <!-- 跳过导航链接 -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <!-- <div>This is a find pets page</div> -->
   <div>
-    <div class="bg row align-items-center">
+    <div class="bg row align-items-center" role="img" aria-label="Companion Connection">
       <div>
         <h1 class="text-center fs-1">Companion Connection</h1>
         <p class="text-center fs-3">Companionship to senior individuals through pet ownership, while saving the lives of companion animals in shelters</p>
       </div>
     </div>
-    <div class="container">
-      <div class="row mt-5">
-        <div class="col-12">
-          <h2 class="text-center">Articles & Resources</h2>
+
+    <!-- 主要内容区域 -->
+    <main id="main-content"   >
+      <div class="container">
+        <div class="row mt-5">
+          <div class="col-12">
+            <h2 class="text-center">Articles & Resources</h2>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap mt-3">
+          <div class="p-2 masonry-item" v-for="item in items" :key="item.id" style="flex: 1 0 21%;">
+            <Card>
+              <template #header>
+                <img :src="item.image" alt="Item Image" class="img-fluid">
+              </template>
+              <template #content>
+                <h5>{{ item.title }}</h5>
+                <p>{{ item.description }}</p>
+              </template>
+            </Card>
+          </div>
         </div>
       </div>
-      <div class="d-flex flex-wrap mt-3">
-        <div class="p-2 masonry-item" v-for="item in items" :key="item.id" style="flex: 1 0 21%;">
-          <Card>
-            <template #header>
-              <img :src="item.image" alt="Item Image" class="img-fluid">
-            </template>
-            <template #content>
-              <h5>{{ item.title }}</h5>
-              <p>{{ item.description }}</p>
-            </template>
-          </Card>
-        </div>
-      </div>
-    </div>
+    </main>
   </div>
 </template>
 

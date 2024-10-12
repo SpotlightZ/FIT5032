@@ -168,7 +168,7 @@
   }
   
   .message.user .message-content {
-    background-color: #c8e6c9;
+    background-color: #D3F2F0FF;
   }
   
   .message.model .message-content {

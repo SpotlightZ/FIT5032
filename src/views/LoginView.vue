@@ -50,11 +50,11 @@ const signin = async () => {
       localStorage.setItem('loggedInUser', JSON.stringify(userData));
 
       if (role === 'admin') {
-        router.replace("/about");
+        router.replace("/dashboard");
       } else if (role === 'user') {
         router.replace("/about");
       } else {
-        router.replace("/about");
+        router.replace("/contact");
       }
     } else {
       console.log("Error");
